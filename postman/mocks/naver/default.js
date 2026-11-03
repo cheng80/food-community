@@ -74,7 +74,6 @@ const sdk = (keyId) => `(() => {
       this.el.dataset.mockMap = "true"; this.el.dataset.mockKeyId = keyId;
       this.el.style.background = "repeating-linear-gradient(45deg,#e8efe4,#e8efe4 12px,#f3f6f0 12px,#f3f6f0 24px)";
       window.__mockNaverMap = this;
-      setTimeout(() => Event.trigger(this, "idle"), 0);
     }
     getCenter() { return this.center; }
     setCenter(c) { this.center = c; Event.trigger(this, "center_changed"); setTimeout(() => Event.trigger(this, "idle"), 0); }

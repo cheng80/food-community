@@ -52,6 +52,8 @@ export function NaverMap({ center, marker, centerPin, zoom = 16, onCenterChange,
         maps.Event.addListener(instance, "idle", () => handlers.current.onIdle?.(read())),
       ];
       setReady(true);
+      // 실제 SDK는 지도를 처음 만들 때 idle을 보내지 않으므로 첫 중심을 멈춘 위치로 직접 알린다.
+      handlers.current.onIdle?.(read());
       dispose = () => { listeners.forEach((listener) => maps.Event.removeListener(listener)); instance.destroy(); map.current = null; };
     }, (failure: Error) => { if (!cancelled) setError(failure.message); });
     return () => { cancelled = true; dispose(); };
