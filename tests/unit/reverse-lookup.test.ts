@@ -75,6 +75,19 @@ describe("reverse 경합과 이전 주소 무효화", () => {
     expect(fetcher).toHaveBeenCalledOnce();
   });
 
+  it("지도가 이미 멈춘 뒤 직접 입력을 눌러도 현재 중심을 다시 조회한다", async () => {
+    const { calls, fetcher, lookup, last } = setup();
+    lookup.settled(A);
+    calls[0].resolve("A 주소");
+    await flush();
+    lookup.clear();
+    expect(fetcher).toHaveBeenCalledTimes(2);
+    expect(last()).toEqual({ status: "loading" });
+    calls[1].resolve("A 주소");
+    await flush();
+    expect(last()).toEqual({ status: "ok", address: "A 주소", ...A });
+  });
+
   it("dispose 후 응답은 무시한다", async () => {
     const { calls, states, lookup } = setup();
     lookup.settled(A);

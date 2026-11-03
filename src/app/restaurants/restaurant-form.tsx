@@ -13,6 +13,7 @@ import { TopNavigation } from "@/components/ui/Navigation";
 import { Textarea } from "@/components/ui/Textarea";
 import { PlaceSummary } from "@/components/ui/Place";
 import { TextField } from "@/components/ui/TextField";
+import type { Restaurant } from "@/lib/data";
 import { actions, useAppState, type RestaurantInput } from "@/lib/store";
 import { clearDraft, getDraft, updateDraft, useDraft, type DraftPhoto } from "@/lib/form-draft";
 import { commitDrafts, discardImage, uploadImage } from "@/lib/upload";
@@ -32,18 +33,19 @@ export function RestaurantForm({ editId }: { editId?: string }) {
   return <Form editId={editId} initial={target} />;
 }
 
-function Form({ editId, initial }: { editId?: string; initial?: { name: string; content: string; address: string; photos: string[]; photoPaths: string[] } }) {
+function Form({ editId, initial }: { editId?: string; initial?: Restaurant }) {
   const router = useRouter();
   const back = useBack();
   const { show: flash, toast } = useFlashToast();
   const { busy, run } = useBusy();
   // 장소 선택 페이지를 다녀와도 입력과 사진을 유지하도록 페이지 밖 저장소에 둔다.
   const draftKey = editId ?? "new";
-  const { name, content, address, place, photos } = useDraft(draftKey, () => ({
-    name: initial?.name ?? "",
+  const { title, content, place, photos } = useDraft(draftKey, () => ({
+    title: initial?.title ?? "",
     content: initial?.content ?? "",
     address: initial?.address ?? "",
-    place: null,
+    // 좌표 도입 전 글은 위치를 추정하지 않고 다시 고르게 한다.
+    place: initial?.placeName && initial.lat !== null && initial.lng !== null ? { name: initial.placeName, address: initial.address, lat: initial.lat, lng: initial.lng } : null,
     photos: initial?.photos.map((url, i) => ({ key: `p${photoSeq++}`, name: `사진 ${i + 1}`, url, path: initial.photoPaths[i], draft: false, status: "complete" as const })) ?? [],
   }));
   const [photoError, setPhotoError] = useState<string>();
@@ -55,7 +57,7 @@ function Form({ editId, initial }: { editId?: string; initial?: { name: string; 
   const uploading = photos.some((p) => p.status === "uploading");
   const errors = {
     photos: ready.length === 0 ? "사진을 1장 이상 올려 주세요." : undefined,
-    ...restaurantErrors({ name, content, address }),
+    ...restaurantErrors({ title, content, placeName: place?.name, address: place?.address, lat: place?.lat, lng: place?.lng }),
   };
   const errorCount = Object.values(errors).filter(Boolean).length;
   const show = (key: keyof typeof errors) => (submitted ? errors[key] : undefined);
@@ -110,7 +112,8 @@ function Form({ editId, initial }: { editId?: string; initial?: { name: string; 
       return;
     }
     const imagePaths = ready.map((p) => p.path!);
-    const input: RestaurantInput = { name: name.trim(), content: content.trim(), address, imagePaths };
+    if (!place) return;
+    const input: RestaurantInput = { title: title.trim(), content: content.trim(), placeName: place.name, address: place.address, lat: place.lat, lng: place.lng, imagePaths };
     return run(async () => {
       try {
         if (editId) {
@@ -192,13 +195,13 @@ function Form({ editId, initial }: { editId?: string; initial?: { name: string; 
             </FileUploader>
             <TextField
               size="lg"
-              icon="search"
-              label="맛집 이름 *"
-              placeholder="식당 이름을 입력하세요"
-              value={name}
+              label="글 제목 *"
+              placeholder="이 글의 제목을 입력하세요"
+              helperText="장소 이름과 별개예요. 최대 40자"
+              value={title}
               maxLength={MAX_TITLE}
-              errorText={show("name")}
-              onChange={(e) => updateDraft(draftKey, { name: e.target.value })}
+              errorText={show("title")}
+              onChange={(e) => updateDraft(draftKey, { title: e.target.value })}
             />
             <Textarea
               label="내용 *"
@@ -215,14 +218,14 @@ function Form({ editId, initial }: { editId?: string; initial?: { name: string; 
             <Button variant="secondary" size="lg" icon={place ? "edit" : "plus"} className="w-full" onClick={openPlace}>
               {place ? "장소 다시 선택" : "장소 입력"}
             </Button>
-            {show("address") && <span className="label-md text-text-error">{show("address")}</span>}
+            {show("place") && <span className="label-md text-text-error">{show("place")}</span>}
             {place ? (
               <>
                 <PlaceSummary name={place.name} address={place.address} onChange={openPlace} />
                 <NaverMap key={`${place.lat},${place.lng}`} center={place} marker className="h-[140px] rounded-xl md:h-[240px]" />
               </>
-            ) : address ? (
-              <p className="body-md text-text-secondary">{address}</p>
+            ) : initial ? (
+              <p className="body-md text-text-secondary">{initial.address} · 지도 위치가 없어 다시 골라야 저장돼요</p>
             ) : null}
           </div>
         </form>

@@ -77,7 +77,7 @@ const sdk = (keyId) => `(() => {
       setTimeout(() => Event.trigger(this, "idle"), 0);
     }
     getCenter() { return this.center; }
-    setCenter(c) { this.center = c; Event.trigger(this, "dragstart"); setTimeout(() => Event.trigger(this, "idle"), 0); }
+    setCenter(c) { this.center = c; Event.trigger(this, "center_changed"); setTimeout(() => Event.trigger(this, "idle"), 0); }
     destroy() { this.destroyed = true; }
   }
   class Marker { constructor(options) { this.options = options; if (options.map) options.map.el.dataset.mockMarker = options.position.lat() + "," + options.position.lng(); } setMap() {} }

@@ -134,7 +134,7 @@ export function MeView() {
               {mine.map((r) => (
                 <PostRow
                   key={r.id}
-                  title={r.name}
+                  title={r.title}
                   meta={`${shortAddress(r.address)} · ${timeAgo(r.createdAt, now)}`}
                   href={`/restaurants/${r.id}`}
                   thumbnailUrl={r.photos[0]}
@@ -159,7 +159,7 @@ export function MeView() {
       <Modal
         open={!!target}
         title="정말 삭제할까요?"
-        description={`‘${target?.name ?? ""}’ 글을 삭제하면 되돌릴 수 없어요.`}
+        description={`‘${target?.title ?? ""}’ 글을 삭제하면 되돌릴 수 없어요.`}
         confirmLabel="삭제"
         busy={deleting.busy}
         onClose={() => setDeleteId(undefined)}

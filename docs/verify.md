@@ -30,7 +30,7 @@ VERIFY_TOOLS=... node tests/harness/run.mjs --serve  # 브라우저 확인, http
 
 포트 3100, 3101, 54397~54399를 쓴다. DB는 임시 폴더에 만들어 실행마다 초기화된다.
 
-지도를 확인할 때는 mock을 띄우고 빌드에 공개 ID와 SDK 주소를 넣는다. 실제 SDK 동작을 보증하지 않는다.
+`npm run test:stack`과 `--serve`는 `postman/mocks/naver`를 함께 띄운다. 빌드에 mock 공개 ID와 SDK 주소를 넣어야 하며(아래), 가짜 SDK라 실제 지도 동작을 보증하지 않는다.
 
 ```sh
 NEXT_PUBLIC_NAVER_MAP_CLIENT_ID=mock-id NEXT_PUBLIC_NAVER_MAP_SDK_URL=http://127.0.0.1:4610/openapi/v3/maps.js npx next build

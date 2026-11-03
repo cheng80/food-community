@@ -61,6 +61,11 @@ async function migrate(pool) {
   const dir = path.join(root, "supabase/migrations");
   const files = readdirSync(dir).filter((f) => f.endsWith(".sql")).sort();
   for (const file of files) {
+    // 좌표 도입 전 글을 재현해 기존 행 전환을 검증한다.
+    if (file.includes("place_location")) {
+      await pool.query("insert into auth.users (id, email) values ('11111111-1111-4111-8111-111111111111', 'legacy@example.test')");
+      await pool.query("insert into public.place (id, user_id, title, content, address) values ('22222222-2222-4222-8222-222222222222', '11111111-1111-4111-8111-111111111111', '좌표 없는 옛 글', '좌표가 도입되기 전에 쓴 후기입니다.', '서울 구로구')");
+    }
     await pool.query(readFileSync(path.join(dir, file), "utf8"));
     console.log(`[stack] migration 적용: ${file}`);
   }

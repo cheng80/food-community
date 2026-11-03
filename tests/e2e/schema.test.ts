@@ -4,7 +4,7 @@ import { rest, storage, tokenFor } from "./client";
 const uuid = "11111111-1111-4111-8111-111111111111";
 const post = (path: string, token: string | null, body: unknown, prefer = "return=representation") =>
   rest(path, token, { method: "POST", headers: { Prefer: prefer }, body: JSON.stringify(body) });
-const validPlace = (userId: string) => ({ user_id: userId, title: "맛집", content: "열 글자 이상의 후기입니다.", address: "서울 구로구" });
+const validPlace = (userId: string) => ({ user_id: userId, title: "맛집", content: "열 글자 이상의 후기입니다.", name: "구로 맛집", address: "서울 구로구", lat: 37.485, lng: 126.89 });
 
 describe("Day55 스키마와 RLS (실제 Postgres + PostgREST)", () => {
   it("anon은 읽기만 된다", async () => {
@@ -54,6 +54,7 @@ describe("Day55 스키마와 RLS (실제 Postgres + PostgREST)", () => {
     for (const bad of [
       { ...base, title: null }, { ...base, content: null }, { ...base, address: null },
       { ...base, title: "   " }, { ...base, title: "가".repeat(41) }, { ...base, content: "짧음" }, { ...base, content: " \n".repeat(20) }, { ...base, address: "" },
+      { ...base, name: null }, { ...base, name: " " }, { ...base, lat: null }, { ...base, lng: null }, { ...base, lat: 0 }, { ...base, lat: 91 }, { ...base, lng: 181 },
     ]) expect((await post("/place", alice.token, bad)).status).toBe(400);
     expect((await rest(`/profile?user_id=eq.${alice.id}`, alice.token, { method: "PATCH", body: JSON.stringify({ nickname: "가" }) })).status).toBe(400);
     expect((await rest(`/profile?user_id=eq.${alice.id}`, alice.token, { method: "PATCH", body: JSON.stringify({ nickname: "가".repeat(13) }) })).status).toBe(400);

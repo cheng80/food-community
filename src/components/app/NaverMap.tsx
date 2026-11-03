@@ -11,6 +11,7 @@ export interface LatLngValue { lat: number; lng: number }
 const AUTH_FAILED = "지도 인증에 실패했어요. 키와 허용 URL을 확인해 주세요.";
 
 export interface NaverMapProps {
+  /** 지도를 옮길 위치. 새 객체를 줄 때만 이동하므로 사용자가 드래그한 위치를 되돌리지 않는다. */
   center: LatLngValue;
   /** 상세의 미니지도처럼 좌표를 고정해 표시하는 핀 */
   marker?: boolean;
@@ -59,10 +60,10 @@ export function NaverMap({ center, marker, centerPin, zoom = 16, onCenterChange,
   }, []);
 
   useEffect(() => {
-    if (!map.current || !api.current) return;
+    if (marker || !map.current || !api.current) return;
     const current = map.current.getCenter();
     if (Math.abs(current.lat() - center.lat) > 1e-7 || Math.abs(current.lng() - center.lng) > 1e-7) map.current.setCenter(new api.current.LatLng(center.lat, center.lng));
-  }, [center.lat, center.lng]);
+  }, [center, marker]);
 
   return (
     <div className={cx("relative overflow-hidden bg-background-subtle", className)}>

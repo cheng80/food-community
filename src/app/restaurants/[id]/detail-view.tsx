@@ -4,11 +4,11 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { errorMessage, useBack, useBusy, useFlashToast } from "@/components/app/hooks";
+import { NaverMap } from "@/components/app/NaverMap";
 import { NotFound } from "@/components/app/NotFound";
 import { Avatar } from "@/components/ui/Avatar";
 import { Button } from "@/components/ui/Button";
 import { Icon } from "@/components/ui/Icon";
-import { MapPreview } from "@/components/ui/MapPreview";
 import { Menu, MenuItem } from "@/components/ui/Menu";
 import { TopNavigation } from "@/components/ui/Navigation";
 import { Modal } from "@/components/ui/Overlay";
@@ -45,9 +45,9 @@ export function DetailView({ id }: { id: string }) {
 
   return (
     <main className="mx-auto w-full max-w-page flex-1 lg:grid lg:grid-cols-2 lg:items-start lg:gap-(--spacing-32) lg:px-(--spacing-20) lg:py-(--spacing-24)">
-      <PhotoSlider photos={r.photos} alt={r.name} className="h-[290px] md:h-[420px] lg:sticky lg:top-(--spacing-24) lg:h-[520px] lg:rounded-xl">
+      <PhotoSlider photos={r.photos} alt={r.title} className="h-[290px] md:h-[420px] lg:sticky lg:top-(--spacing-24) lg:h-[520px] lg:rounded-xl">
         <div className="relative" onBlur={(e) => !e.currentTarget.contains(e.relatedTarget) && setMenuOpen(false)}>
-          <TopNavigation title={r.name} onBack={back} onMore={() => setMenuOpen((o) => !o)} />
+          <TopNavigation title={r.title} onBack={back} onMore={() => setMenuOpen((o) => !o)} />
           {menuOpen && (
             <Menu className="absolute top-full right-0 z-20">
               <MenuItem size="sm" icon="share" onClick={() => copy(window.location.href, "링크를 복사했어요")}>
@@ -70,22 +70,8 @@ export function DetailView({ id }: { id: string }) {
       </PhotoSlider>
 
       <div>
-        <section className="flex flex-col gap-(--spacing-16) px-(--spacing-20) pt-(--spacing-20) pb-(--spacing-24) lg:pt-0">
-          <div className="flex flex-col gap-(--spacing-12)">
-            <h1 className="heading-lg text-text-default">{r.name}</h1>
-            <Link href={`/users/${r.authorId}`} className="flex items-center gap-(--spacing-8) self-start">
-              <Avatar src={author?.avatarUrl} />
-              <span className="label-lg text-text-default">{author?.nickname ?? "알 수 없음"}</span>
-              <span className="label-md text-text-tertiary">{formatDate(r.createdAt)} 작성</span>
-            </Link>
-          </div>
-          <p className="body-lg whitespace-pre-line text-text-content">{r.content}</p>
-        </section>
-
-        <div className="h-2 bg-background-subtle lg:rounded-sm" />
-
-        <section className="flex flex-col gap-(--spacing-12) px-(--spacing-20) py-(--spacing-24)">
-          <h2 className="heading-sm text-text-default">위치</h2>
+        <section className="flex flex-col gap-(--spacing-12) px-(--spacing-20) pt-(--spacing-20) pb-(--spacing-24) lg:pt-0">
+          <h2 className="heading-sm text-text-default">{r.placeName ?? "위치"}</h2>
           <div className="flex items-center gap-(--spacing-8)">
             <Icon name="home" size={16} className="text-icon-brand" />
             <p className="label-lg flex-1 text-text-default">{r.address}</p>
@@ -98,16 +84,34 @@ export function DetailView({ id }: { id: string }) {
               <span className="label-md text-text-secondary">복사</span>
             </button>
           </div>
-          <MapPreview address={r.address} className="md:h-[240px]" />
+          {r.lat !== null && r.lng !== null ? (
+            <NaverMap key={`${r.lat},${r.lng}`} center={{ lat: r.lat, lng: r.lng }} marker className="h-[160px] rounded-xl md:h-[240px]" />
+          ) : (
+            <p className="body-md text-text-secondary">지도 위치가 등록되지 않은 글이에요</p>
+          )}
           <Button
             variant="secondary"
             icon="arrow-up"
             className="w-full"
-            onClick={() => window.open(`https://map.kakao.com/link/search/${encodeURIComponent(r.address)}`, "_blank", "noopener")}
+            onClick={() => window.open(`https://map.naver.com/p/search/${encodeURIComponent(`${r.placeName ?? ""} ${r.address}`.trim())}`, "_blank", "noopener")}
           >
-            카카오맵으로 길찾기
+            네이버지도로 길찾기
           </Button>
         </section>
+        <div className="h-2 bg-background-subtle lg:rounded-sm" />
+
+        <section className="flex flex-col gap-(--spacing-16) px-(--spacing-20) pt-(--spacing-24) pb-(--spacing-24)">
+          <div className="flex flex-col gap-(--spacing-12)">
+            <h1 className="heading-lg text-text-default">{r.title}</h1>
+            <Link href={`/users/${r.authorId}`} className="flex items-center gap-(--spacing-8) self-start">
+              <Avatar src={author?.avatarUrl} />
+              <span className="label-lg text-text-default">{author?.nickname ?? "알 수 없음"}</span>
+              <span className="label-md text-text-tertiary">{formatDate(r.createdAt)} 작성</span>
+            </Link>
+          </div>
+          <p className="body-lg whitespace-pre-line text-text-content">{r.content}</p>
+        </section>
+
       </div>
 
       <Modal

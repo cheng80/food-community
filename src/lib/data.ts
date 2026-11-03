@@ -6,8 +6,13 @@ export interface User {
 
 export interface Restaurant {
   id: string;
-  name: string;
+  /** 글 제목. 장소 이름은 placeName이다. */
+  title: string;
+  /** 장소 이름. 좌표 도입 전 글은 null이다. */
+  placeName: string | null;
   address: string;
+  lat: number | null;
+  lng: number | null;
   content: string;
   /** 목록 카드 한 줄 소개 (없으면 content) */
   summary?: string;

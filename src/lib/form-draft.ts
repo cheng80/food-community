@@ -20,7 +20,7 @@ export interface PlaceSelection {
 }
 
 export interface RestaurantDraft {
-  name: string;
+  title: string;
   content: string;
   address: string;
   place: PlaceSelection | null;

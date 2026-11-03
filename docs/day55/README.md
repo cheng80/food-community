@@ -18,7 +18,7 @@ erDiagram
 - `auth.users`가 회원 원본이다. 가입 트리거 `on_auth_user_created`가 `profile` 1:1 행을 만든다.
 - `place.title`, `content`, `address`, `user_id`와 `place_image.image_path`, `place_id`는 NOT NULL이다. `profile.nickname`, `image_path`는 선택값이다.
 - 이미지 파일은 Storage에, DB에는 `userUUID/uuidv4.ext` 경로만 저장한다. 화면 URL은 서버에서 `SUPABASE_STORAGE_URL`과 조합한다.
-- PRD의 위도·경도는 지도 단계(Day58)에서 별도 migration으로 추가한다.
+- 장소명과 위도·경도는 30단계 migration에서 추가했다. 기존 행은 NULL로 두고 새 행과 수정 행에만 필수로 적용한다.
 
 ## Storage
 
@@ -43,6 +43,7 @@ erDiagram
 | 2 | `20261103020722_upload_chunk_bucket.sql` | 19 | 10MB를 BFF로 받기 위한 비공개 청크 버킷 |
 | 3 | `20261103020855_save_place.sql` | 20 | 글과 이미지 경로를 한 트랜잭션으로 저장하는 RPC |
 | 4 | `20261103021238_place_soft_delete.sql` | 21 | `deleted_at`, 삭제 글 RLS 차단, 소프트 삭제 RPC |
+| 5 | `20261103023640_place_location.sql` | 30 | 장소명 `name`, `lat`, `lng`, `save_place` 교체 |
 
 ## 환경변수
 

@@ -35,15 +35,19 @@ describe("image validation", () => {
 });
 
 describe("restaurantErrors", () => {
-  const valid = { name: "맛집", content: "가".repeat(10), address: "서울 구로구" };
+  const valid = { title: "맛집", content: "가".repeat(10), placeName: "장소", address: "서울 구로구 구로동 1", lat: 37.5, lng: 127 };
   const count = (input: Record<string, unknown>) => Object.values(restaurantErrors(input)).filter(Boolean).length;
-  it("경계값", () => {
+  it("제목과 장소명은 각자 검사한다", () => {
     expect(count(valid)).toBe(0);
-    expect(count({ ...valid, name: "가".repeat(40) })).toBe(0);
-    expect(count({ ...valid, name: "가".repeat(41) })).toBe(1);
-    expect(count({ ...valid, content: "가".repeat(9) })).toBe(1);
+    expect(count({ ...valid, title: "가".repeat(40) })).toBe(0);
+    expect(count({ ...valid, title: "가".repeat(41) })).toBe(1);
+    expect(count({ ...valid, placeName: "가".repeat(41) })).toBe(0);
+    expect(count({ ...valid, placeName: "가".repeat(61) })).toBe(1);
+    expect(count({ ...valid, placeName: " " })).toBe(1);
     expect(count({ ...valid, content: `  ${"가".repeat(9)}  ` })).toBe(1);
-    expect(count({ name: "   ", content: "", address: " " })).toBe(3);
-    expect(count({ name: 1, content: null, address: undefined })).toBe(3);
+    expect(count({ title: " ", content: "", placeName: "", address: "" })).toBe(3);
+  });
+  it.each([[0, 127], [37.5, 0], [91, 127], [37.5, 181], ["37.5", 127], [null, 127], [undefined, undefined], [NaN, 127], [Infinity, 127]])("잘못된 좌표 거부: %j, %j", (lat, lng) => {
+    expect(restaurantErrors({ ...valid, lat, lng }).place).toBeTruthy();
   });
 });

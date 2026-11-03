@@ -21,24 +21,27 @@ export function createReverseLookup(fetcher: Fetcher, onState: (state: ReverseSt
   let known = initial;
   let control: AbortController | undefined;
   let seq = 0;
+  let last: { lat: number; lng: number } | undefined;
 
   const cancel = () => { seq++; control?.abort(); control = undefined; };
 
-  return {
+  const lookup = {
     /** 검색 결과 선택: 결과의 지번 주소와 좌표를 그대로 쓴다. */
     select(place: Known) {
       cancel();
       known = { address: place.address, lat: place.lat, lng: place.lng };
       onState({ status: "ok", ...known });
     },
-    /** 직접 입력: 기존 주소를 버리고 현재 중심의 주소를 찾게 한다. */
+    /** 직접 입력: 기존 주소를 버리고 현재 중심의 주소를 찾는다. 지도가 움직이지 않아도 다시 조회한다. */
     clear() {
       cancel();
       known = undefined;
       onState({ status: "loading" });
+      if (last) lookup.settled(last);
     },
     /** 중심이 바뀐 순간 */
     moved(center: { lat: number; lng: number }) {
+      last = center;
       if (same(known, center.lat, center.lng)) return;
       cancel();
       known = undefined;
@@ -46,6 +49,7 @@ export function createReverseLookup(fetcher: Fetcher, onState: (state: ReverseSt
     },
     /** 움직임이 멈춘 순간 */
     settled(center: { lat: number; lng: number }) {
+      last = center;
       if (same(known, center.lat, center.lng)) return;
       cancel();
       known = undefined;
@@ -67,4 +71,5 @@ export function createReverseLookup(fetcher: Fetcher, onState: (state: ReverseSt
     },
     dispose: cancel,
   };
+  return lookup;
 }

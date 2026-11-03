@@ -27,8 +27,8 @@ export function HomeView() {
 
   const results = useMemo(() => {
     const q = query.trim().toLowerCase();
-    const hits = q ? restaurants.filter((r) => [r.name, r.address, r.content].some((v) => v.toLowerCase().includes(q))) : restaurants;
-    return [...hits].sort((a, b) => (sort === "name" ? a.name.localeCompare(b.name, "ko") : b.createdAt - a.createdAt));
+    const hits = q ? restaurants.filter((r) => [r.title, r.placeName ?? "", r.address, r.content].some((v) => v.toLowerCase().includes(q))) : restaurants;
+    return [...hits].sort((a, b) => (sort === "name" ? a.title.localeCompare(b.title, "ko") : b.createdAt - a.createdAt));
   }, [restaurants, query, sort]);
   const hasMore = visible < results.length;
 
@@ -67,7 +67,7 @@ export function HomeView() {
             type="search"
             label="검색"
             icon="search"
-            placeholder="맛집 이름, 주소, 내용으로 검색"
+            placeholder="맛집 제목, 장소, 주소, 내용으로 검색"
             value={query}
             onChange={(e) => {
               setQuery(e.target.value);

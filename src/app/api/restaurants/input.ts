@@ -15,9 +15,12 @@ export async function placeInput({ db, user }: Session, body: Record<string, unk
   const found = await Promise.all((paths as string[]).map((path) => db.storage.from("place-image").exists(path)));
   if (found.some((result) => !result.data)) throw new ApiError(400, "사진을 다시 올려 주세요.");
   return {
-    p_title: (body.name as string).trim(),
+    p_title: (body.title as string).trim(),
     p_content: (body.content as string).trim(),
+    p_name: (body.placeName as string).trim(),
     p_address: (body.address as string).trim(),
+    p_lat: body.lat as number,
+    p_lng: body.lng as number,
     p_image_paths: paths as string[],
   };
 }

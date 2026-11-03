@@ -13,12 +13,12 @@ export function RestaurantCard({ restaurant: r }: { restaurant: Restaurant }) {
   return (
     <Link
       href={`/restaurants/${r.id}`}
-      aria-label={`${r.name} · ${shortAddress(r.address)}`}
+      aria-label={`${r.title} · ${shortAddress(r.address)}`}
       className="block h-full rounded-[10px] outline-offset-2 focus-visible:outline-2 focus-visible:outline-background-brand"
     >
       <Card
         className="h-full"
-        title={r.name}
+        title={r.title}
         address={shortAddress(r.address)}
         description={r.summary ?? r.content}
         meta={`${author} · ${timeAgo(r.createdAt, now)}`}

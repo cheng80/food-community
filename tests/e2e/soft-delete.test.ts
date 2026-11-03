@@ -4,7 +4,7 @@ import { Browser, rest, testApi } from "./client";
 const jpeg = () => { const b = new Uint8Array(200); b.set([0xff, 0xd8, 0xff]); return b; };
 type Obj = { bucket_id: string; name: string };
 const placeFiles = async (userId: string) => (await testApi("objects") as Obj[]).filter((o) => o.bucket_id === "place-image" && o.name.startsWith(userId)).map((o) => o.name).sort();
-const valid = (imagePaths: string[]) => ({ name: "삭제될 맛집", content: "소프트 삭제 확인용 후기입니다.", address: "서울 구로구", imagePaths });
+const valid = (imagePaths: string[]) => ({ title: "삭제될 맛집", content: "소프트 삭제 확인용 후기입니다.", placeName: "구로 맛집", address: "서울특별시 구로구 구로동 1124", lat: 37.485, lng: 126.89, imagePaths });
 
 async function signedIn(email: string) {
   const browser = new Browser();
@@ -107,7 +107,7 @@ describe("소프트 삭제", () => {
     expect(await (await call(alice.token)).json()).toBe(true);
     expect(await (await call(alice.token)).json()).toBe(false);
     // save_place로 삭제된 글을 되살릴 수 없다
-    const revive = await rest("/rpc/save_place", alice.token, { method: "POST", body: JSON.stringify({ p_id: id, p_title: "부활", p_content: "되살리기 시도 후기입니다.", p_address: "서울", p_image_paths: [`${alice.id}/${crypto.randomUUID()}.jpg`] }) });
+    const revive = await rest("/rpc/save_place", alice.token, { method: "POST", body: JSON.stringify({ p_id: id, p_title: "부활", p_content: "되살리기 시도 후기입니다.", p_name: "직접 장소", p_address: "서울", p_lat: 37.5, p_lng: 127, p_image_paths: [`${alice.id}/${crypto.randomUUID()}.jpg`] }) });
     expect((await revive.json()).code).toBe("P0002");
     expect((await raw(id)).images).toBe(2);
   });

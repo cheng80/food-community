@@ -7,20 +7,26 @@ interface PlaceRow {
   id: string;
   user_id: string;
   title: string;
+  name: string | null;
   content: string;
   address: string;
+  lat: number | null;
+  lng: number | null;
   created_at: string;
   place_image: { image_path: string; position: number }[];
 }
 
-const COLUMNS = "id,user_id,title,content,address,created_at,place_image(image_path,position)";
+const COLUMNS = "id,user_id,title,name,content,address,lat,lng,created_at,place_image(image_path,position)";
 
 function toRestaurant(row: PlaceRow) {
   const paths = [...row.place_image].sort((a, b) => a.position - b.position).map((image) => image.image_path);
   return {
     id: row.id,
-    name: row.title,
+    title: row.title,
+    placeName: row.name,
     address: row.address,
+    lat: row.lat,
+    lng: row.lng,
     content: row.content,
     authorId: row.user_id,
     createdAt: Date.parse(row.created_at),

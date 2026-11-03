@@ -9,7 +9,7 @@ export interface AppState {
   restaurants: Restaurant[];
   loaded: boolean;
 }
-export type RestaurantInput = Pick<Restaurant, "name" | "address" | "content"> & { imagePaths: string[] };
+export type RestaurantInput = Pick<Restaurant, "title" | "address" | "content"> & { placeName: string; lat: number; lng: number; imagePaths: string[] };
 const initial: AppState = { loggedIn: false, me: { id: "", nickname: "방문자" }, users: [], restaurants: [], loaded: false };
 let state = initial;
 let refreshSeq = 0;

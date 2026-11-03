@@ -27,14 +27,25 @@
 | --- | --- | --- | --- |
 | GET | `/api/bootstrap` | | `restaurants`에 최신순 목록 (최대 1000개) |
 | GET | `/api/restaurants/{id}` | | `Restaurant`. 없으면 404 |
-| POST | `/api/restaurants` | `{ name, content, address, imagePaths }` | 201 `{ id }` |
+| POST | `/api/restaurants` | `{ title, content, placeName, address, lat, lng, imagePaths }` | 201 `{ id }` |
 | PATCH | `/api/restaurants/{id}` | 같음 | `{ id }`. 타인 글 403 |
 | DELETE | `/api/restaurants/{id}` | | `{ ok }`. 소프트 삭제. 타인 글 403 |
 
-- `name` 1~40자, `content` 10~10000자, `address` 1~300자, `imagePaths`는 본인 폴더의 실제 파일 1~5개다. 작성자는 세션 사용자이며 본문의 값은 무시한다.
+- `title`(글 제목) 1~40자, `placeName`(장소 이름) 1~60자, `content` 10~10000자, `address` 1~300자, `lat`·`lng`는 0이 아닌 유효 범위 숫자, `imagePaths`는 본인 폴더의 실제 파일 1~5개다. 작성자는 세션 사용자이며 본문의 값은 무시한다.
 - 글과 이미지 경로는 `save_place` RPC 한 트랜잭션으로 저장한다. 실패하면 전체가 롤백되고 기존 파일은 지우지 않는다. 커밋 후 교체된 파일만 지운다.
 - 다른 글이 쓰는 경로는 409다.
 - 삭제하면 `deleted_at`을 기록한다. 이후 목록, 상세, 마이 페이지, 수정, 재삭제는 없는 글로 처리한다(404). Data API 직접 조회도 RLS로 막힌다. 이미지 행과 파일은 보존하므로, 공개 URL을 아는 사람은 파일 자체를 계속 받을 수 있다.
+
+`Restaurant` 응답의 `placeName`, `lat`, `lng`는 좌표 도입 전 글이면 null이다. 추정값을 넣지 않으며 그 글을 수정하려면 장소를 다시 골라야 한다.
+
+## 네이버 지도
+
+| 메서드 | 경로 | 요청 | 응답 |
+| --- | --- | --- | --- |
+| POST | `/api/naver/search` | `{ query }` 1~100자 | `{ results: [{ name, address, lat, lng }] }` |
+| POST | `/api/naver/reverse` | `{ lat, lng }` | `{ address }`. 바다, 결과 없음, 불완전한 주소는 null |
+
+로그인과 같은 출처 Origin이 필요하다. 비밀 헤더는 서버에서만 붙인다. 네이버 응답은 5초 timeout이며 504, 429는 그대로, 401·403·404·5xx·깨진 응답은 502, 키 없음은 503이다. 브라우저에는 지도 SDK 공개 ID만 전달한다.
 
 ## 이미지 업로드
 
