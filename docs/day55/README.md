@@ -35,15 +35,16 @@ erDiagram
 
 ## 적용 순서
 
-동일 프로젝트에 한 번씩, 아래 순서로만 적용한다. 각 단계 폴더는 앞 단계 migration을 포함하므로 **가장 최신 단계 폴더에서 한 번 `supabase db push`** 하면 된다. base를 폴더마다 다시 실행하지 않는다.
+확정 프로젝트 `npppyzvtktntjobjnliz`에는 아래 6개를 이미 적용했고, 파일명 version은 원격 `schema_migrations`와 같다. 기존 파일을 다시 실행하지 않는다.
 
 | 순서 | migration | 도입 단계 | 내용 |
 | --- | --- | --- | --- |
-| 1 | `20261103013430_community_base.sql` | Day55·18 | 테이블, 트리거, RLS, `profile-image`·`place-image` 버킷 |
-| 2 | `20261103020722_upload_chunk_bucket.sql` | 19 | 10MB를 BFF로 받기 위한 비공개 청크 버킷 |
-| 3 | `20261103020855_save_place.sql` | 20 | 글과 이미지 경로를 한 트랜잭션으로 저장하는 RPC |
-| 4 | `20261103021238_place_soft_delete.sql` | 21 | `deleted_at`, 삭제 글 RLS 차단, 소프트 삭제 RPC |
-| 5 | `20261103023640_place_location.sql` | 30 | 장소명 `name`, `lat`, `lng`, `save_place` 교체 |
+| 1 | `20261103031912_community_base.sql` | Day55·18 | 테이블, 트리거, RLS, `profile-image`·`place-image` 버킷 |
+| 2 | `20261103031920_upload_chunk_bucket.sql` | 19 | 10MB를 BFF로 받기 위한 비공개 청크 버킷 |
+| 3 | `20261103031929_save_place.sql` | 20 | 글과 이미지 경로를 한 트랜잭션으로 저장하는 RPC |
+| 4 | `20261103032944_place_soft_delete.sql` | 21 | `deleted_at`, 삭제 글 RLS 차단, 소프트 삭제 RPC |
+| 5 | `20261103033005_place_location.sql` | 30 | 장소명 `name`, `lat`, `lng`, `save_place` 교체 |
+| 6 | `20261103033413_app_table_grants.sql` | 33 | 앱 테이블 권한을 필요한 범위로 축소, `rls_auto_enable` 직접 실행 회수 |
 
 ## 환경변수
 
@@ -58,7 +59,7 @@ erDiagram
 
 ## 검증 상태
 
-로컬 실제 Postgres와 PostgREST에 migration을 적용해 제약과 RLS를 확인했다(`tests/e2e/schema.test.ts`, `docs/verify.md`). Storage 정책은 실제 Postgres의 `storage.objects` 스텁에서 확인했고 Storage 서버는 가짜다. 실제 Supabase 프로젝트 적용과 Google OAuth 연결은 **아직 하지 않았다**.
+로컬 실제 Postgres와 PostgREST에 migration을 적용해 제약과 RLS를 확인했다(`tests/e2e/schema.test.ts`, `docs/verify.md`). Storage 정책은 실제 Postgres의 `storage.objects` 스텁에서 확인했고 Storage 서버는 가짜다. 실제 Supabase 프로젝트 적용과 익명 조회·쓰기 차단은 확인했다. Google OAuth 연결과 로그인 이후 쓰기는 **아직 검증하지 않았다**.
 
 ## 정정 이력
 
