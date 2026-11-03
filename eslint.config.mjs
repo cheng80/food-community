@@ -7,6 +7,8 @@ const eslintConfig = defineConfig([
   ...nextTs,
   // Override default ignores of eslint-config-next.
   globalIgnores([
+    // Postman mock은 CommonJS 핸들러로 실행된다.
+    "postman/**",
     // Default ignores of eslint-config-next:
     ".next/**",
     "out/**",

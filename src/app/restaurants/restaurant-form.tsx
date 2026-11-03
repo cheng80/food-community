@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { errorMessage, useBack, useBusy, useFlashToast, useRequireLogin } from "@/components/app/hooks";
 import { NotFound, PageLoading } from "@/components/app/NotFound";
 import { Button } from "@/components/ui/Button";
@@ -17,19 +17,9 @@ import { Textarea } from "@/components/ui/Textarea";
 import { TextField } from "@/components/ui/TextField";
 import { addressBook } from "@/lib/data";
 import { actions, useAppState, type RestaurantInput } from "@/lib/store";
+import { clearDraft, getDraft, updateDraft, useDraft, type DraftPhoto } from "@/lib/form-draft";
 import { commitDrafts, discardImage, uploadImage } from "@/lib/upload";
 import { IMAGE_TYPES, MAX_BYTES, MAX_PHOTOS, MAX_TITLE, MIN_CONTENT, restaurantErrors } from "@/lib/validation";
-
-interface Photo {
-  key: string;
-  name: string;
-  url?: string;
-  /** Storage 경로. 업로드가 끝나면 채워진다. */
-  path?: string;
-  /** 이번 작성 중 올린 이미지인지. 기존 이미지는 저장 후 서버가 지운다. */
-  draft: boolean;
-  status: "uploading" | "complete" | "error";
-}
 
 let photoSeq = 0;
 
@@ -50,15 +40,16 @@ function Form({ editId, initial }: { editId?: string; initial?: { name: string; 
   const back = useBack();
   const { show: flash, toast } = useFlashToast();
   const { busy, run } = useBusy();
-  const [photos, setPhotos] = useState<Photo[]>(
-    () => initial?.photos.map((url, i) => ({ key: `p${photoSeq++}`, name: `사진 ${i + 1}`, url, path: initial.photoPaths[i], draft: false, status: "complete" as const })) ?? [],
-  );
-  // 업로드가 끝나기 전에 사용자가 지운 사진을 알아내기 위한 현재 키 목록
-  const liveKeys = useRef(new Set(photos.map((p) => p.key)));
+  // 장소 선택 페이지를 다녀와도 입력과 사진을 유지하도록 페이지 밖 저장소에 둔다.
+  const draftKey = editId ?? "new";
+  const { name, content, address, photos } = useDraft(draftKey, () => ({
+    name: initial?.name ?? "",
+    content: initial?.content ?? "",
+    address: initial?.address ?? "",
+    place: null,
+    photos: initial?.photos.map((url, i) => ({ key: `p${photoSeq++}`, name: `사진 ${i + 1}`, url, path: initial.photoPaths[i], draft: false, status: "complete" as const })) ?? [],
+  }));
   const [photoError, setPhotoError] = useState<string>();
-  const [name, setName] = useState(initial?.name ?? "");
-  const [content, setContent] = useState(initial?.content ?? "");
-  const [address, setAddress] = useState(initial?.address ?? "");
   const [submitted, setSubmitted] = useState(false);
   const [bannerOpen, setBannerOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -82,12 +73,12 @@ function Form({ editId, initial }: { editId?: string; initial?: { name: string; 
     else if (valid.length > room) setPhotoError(`사진은 최대 ${MAX_PHOTOS}장까지 올릴 수 있어요.`);
     for (const file of valid.slice(0, room)) {
       const key = `p${photoSeq++}`;
-      liveKeys.current.add(key);
-      setPhotos((list) => [...list, { key, name: file.name, draft: true, status: "uploading" }]);
-      const update = (patch: Partial<Photo>) => setPhotos((list) => list.map((p) => (p.key === key ? { ...p, ...patch } : p)));
+      updateDraft(draftKey, (d) => ({ photos: [...d.photos, { key, name: file.name, draft: true, status: "uploading" }] }));
+      const update = (patch: Partial<DraftPhoto>) => updateDraft(draftKey, (d) => ({ photos: d.photos.map((p) => (p.key === key ? { ...p, ...patch } : p)) }));
       uploadImage(file, "place-image").then(
         ({ path, url }) => {
-          if (liveKeys.current.has(key)) update({ path, url, status: "complete" });
+          // 업로드 중에 지운 사진이나 저장·취소가 끝난 글의 사진은 남기지 않는다.
+          if (getDraft(draftKey)?.photos.some((p) => p.key === key)) update({ path, url, status: "complete" });
           else discardImage("place-image", path);
         },
         (error) => {
@@ -98,15 +89,15 @@ function Form({ editId, initial }: { editId?: string; initial?: { name: string; 
     }
   };
 
-  const removePhoto = (photo: Photo) => {
-    liveKeys.current.delete(photo.key);
-    setPhotos((list) => list.filter((p) => p.key !== photo.key));
+  const removePhoto = (photo: DraftPhoto) => {
+    updateDraft(draftKey, (d) => ({ photos: d.photos.filter((p) => p.key !== photo.key) }));
     if (photo.draft && photo.path) discardImage("place-image", photo.path);
   };
 
   /** 작성 취소: 저장하지 않은 이미지는 지우고 돌아간다. */
   const cancel = () => {
     photos.filter((p) => p.draft).forEach(removePhoto);
+    clearDraft(draftKey);
     back();
   };
 
@@ -128,19 +119,13 @@ function Form({ editId, initial }: { editId?: string; initial?: { name: string; 
         if (editId) {
           await actions.updateRestaurant(editId, input);
           commitDrafts(imagePaths);
-          // 숨겨진 폼으로 돌아와도 다시 저장된 이미지를 임시본으로 보지 않게 한다.
-          setPhotos((list) => list.map((p) => ({ ...p, draft: false })));
           router.replace(`/restaurants/${editId}`);
+          clearDraft(draftKey);
         } else {
           const id = await actions.createRestaurant(input);
           commitDrafts(imagePaths);
-          liveKeys.current.clear();
           router.replace(`/restaurants/${id}`);
-          // 이전 라우트는 숨김 상태로 보존되므로 다음 글쓰기를 위해 비움
-          setPhotos([]);
-          setName("");
-          setContent("");
-          setAddress("");
+          clearDraft(draftKey);
           setSubmitted(false);
         }
       } catch (error) {
@@ -218,7 +203,7 @@ function Form({ editId, initial }: { editId?: string; initial?: { name: string; 
               value={name}
               maxLength={MAX_TITLE}
               errorText={show("name")}
-              onChange={(e) => setName(e.target.value)}
+              onChange={(e) => updateDraft(draftKey, { name: e.target.value })}
             />
             <Textarea
               label="내용 *"
@@ -226,7 +211,7 @@ function Form({ editId, initial }: { editId?: string; initial?: { name: string; 
               value={content}
               errorText={show("content")}
               counterText={(n) => `${n} / 최소 ${MIN_CONTENT}자`}
-              onChange={(e) => setContent(e.target.value)}
+              onChange={(e) => updateDraft(draftKey, { content: e.target.value })}
             />
           </div>
 
@@ -238,11 +223,16 @@ function Form({ editId, initial }: { editId?: string; initial?: { name: string; 
               options={addressBook.map((a) => ({ value: a, label: a }))}
               value={address || undefined}
               errorText={show("address")}
-              onChange={setAddress}
+              onChange={(value) => updateDraft(draftKey, { address: value })}
             />
-            <Button variant="secondary" icon="search" className="w-[170px]" onClick={() => setSheetOpen(true)}>
-              주소 검색
-            </Button>
+            <div className="flex gap-(--spacing-8)">
+              <Button variant="secondary" icon="search" className="w-[170px]" onClick={() => setSheetOpen(true)}>
+                주소 검색
+              </Button>
+              <Button variant="secondary" icon="map-pin" className="flex-1" onClick={() => router.push(`/restaurants/place?for=${draftKey}`)}>
+                장소 입력
+              </Button>
+            </div>
             <MapPreview address={address || undefined} className="md:h-[240px]" />
           </div>
         </form>
@@ -273,7 +263,7 @@ function Form({ editId, initial }: { editId?: string; initial?: { name: string; 
                   key={a}
                   selected={a === address}
                   onClick={() => {
-                    setAddress(a);
+                    updateDraft(draftKey, { address: a });
                     setSheetOpen(false);
                   }}
                 >
