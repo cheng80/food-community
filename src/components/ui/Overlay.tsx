@@ -1,4 +1,4 @@
-import { useEffect, useId, type ReactNode } from "react";
+import { useEffect, useId, useRef, type ReactNode, type RefObject } from "react";
 import { cx } from "@/lib/cx";
 import { Button } from "./Button";
 import { Icon, type IconName } from "./Icon";
@@ -10,6 +10,34 @@ function useEscape(open: boolean, onClose?: () => void) {
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [open, onClose]);
+}
+
+/** 열리면 대화상자로 포커스를 옮기고 Tab을 안에 가두며, 닫히면 원래 위치로 돌려준다 */
+function useDialogFocus(open: boolean, ref: RefObject<HTMLDivElement | null>) {
+  useEffect(() => {
+    if (!open) return;
+    const previous = document.activeElement as HTMLElement | null;
+    ref.current?.focus();
+    const trap = (e: KeyboardEvent) => {
+      if (e.key !== "Tab" || !ref.current) return;
+      const items = ref.current.querySelectorAll<HTMLElement>("a[href],button:not(:disabled),input:not(:disabled)");
+      if (!items.length) return;
+      const [first, last] = [items[0], items[items.length - 1]];
+      const active = document.activeElement;
+      if (e.shiftKey && (active === first || active === ref.current)) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && active === last) {
+        e.preventDefault();
+        first.focus();
+      }
+    };
+    window.addEventListener("keydown", trap);
+    return () => {
+      window.removeEventListener("keydown", trap);
+      previous?.focus();
+    };
+  }, [open, ref]);
 }
 
 export interface ModalProps {
@@ -39,10 +67,14 @@ export function Modal({
   const titleId = useId();
   const close = busy ? undefined : onClose;
   useEscape(open, close);
+  const dialog = useRef<HTMLDivElement>(null);
+  useDialogFocus(open, dialog);
   if (!open) return null;
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-background-overlay" onClick={close}>
       <div
+        ref={dialog}
+        tabIndex={-1}
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}
@@ -81,10 +113,14 @@ export interface BottomSheetProps {
 
 export function BottomSheet({ open, title, children, onClose, className }: BottomSheetProps) {
   useEscape(open, onClose);
+  const dialog = useRef<HTMLDivElement>(null);
+  useDialogFocus(open, dialog);
   if (!open) return null;
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center bg-background-overlay" onClick={onClose}>
       <div
+        ref={dialog}
+        tabIndex={-1}
         role="dialog"
         aria-modal="true"
         aria-label={title}

@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/Button";
 import { Empty } from "@/components/ui/Empty";
 import { Icon } from "@/components/ui/Icon";
 import { Menu, MenuItem } from "@/components/ui/Menu";
+import { ProgramBanner } from "@/components/ui/Payment";
 import { TopNavigation } from "@/components/ui/Navigation";
 import { Spinner } from "@/components/ui/Spinner";
 import { TextField } from "@/components/ui/TextField";
@@ -63,6 +64,9 @@ export function HomeView() {
         className="sticky top-0 z-30"
       />
       <main className="mx-auto w-full max-w-page flex-1 pb-20">
+        <div className="pb-(--spacing-8) md:px-(--spacing-20)">
+          <ProgramBanner href="/programs/sushi-bento" label="심심한 주말 놓치지 아까운 기회, 요리 수업 알아보기" />
+        </div>
         <InstallPrompt />
         <div className="px-(--spacing-20) py-(--spacing-8)">
           <TextField
