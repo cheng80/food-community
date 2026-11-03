@@ -1,6 +1,8 @@
 export const APP_URL = process.env.APP_URL!;
 export const GATEWAY_URL = process.env.GATEWAY_URL!;
 export const PUBLISHABLE_KEY = process.env.PUBLISHABLE_KEY!;
+// 테스트가 브라우저 코드를 위해 전역 fetch를 바꿔도 실제 요청을 보낼 수 있게 보관한다.
+const realFetch = globalThis.fetch;
 
 /** 브라우저처럼 쿠키를 저장하고 같은 출처 Origin을 보내는 클라이언트 */
 export class Browser {
@@ -12,7 +14,7 @@ export class Browser {
     const headers = new Headers(rest.headers);
     if (this.cookies.size) headers.set("cookie", [...this.cookies].map(([k, v]) => `${k}=${v}`).join("; "));
     if (origin && rest.method && rest.method !== "GET") headers.set("origin", origin);
-    const response = await fetch(url.startsWith("http") ? url : APP_URL + url, { ...rest, headers, redirect: "manual" });
+    const response = await realFetch(url.startsWith("http") ? url : APP_URL + url, { ...rest, headers, redirect: "manual" });
     for (const line of response.headers.getSetCookie()) {
       this.setCookies.push(line);
       const [pair] = line.split(";");
@@ -48,7 +50,7 @@ export class Browser {
 }
 
 export const testApi = (name: string, body?: unknown) =>
-  fetch(`${GATEWAY_URL}/__test/${name}`, { method: "POST", body: JSON.stringify(body ?? {}) }).then((r) => r.json());
+  realFetch(`${GATEWAY_URL}/__test/${name}`, { method: "POST", body: JSON.stringify(body ?? {}) }).then((r) => r.json());
 
 export const tokenFor = (email: string, fullName?: string): Promise<{ id: string; token: string }> => testApi("token", { email, fullName });
 

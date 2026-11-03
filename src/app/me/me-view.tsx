@@ -14,9 +14,8 @@ import { PostRow } from "@/components/ui/PostRow";
 import { TextField } from "@/components/ui/TextField";
 import { nicknameError, shortAddress, timeAgo } from "@/lib/format";
 import { actions, useAppState, useNow } from "@/lib/store";
-
-const AVATAR_TYPES = ["image/jpeg", "image/png", "image/webp"];
-const AVATAR_MAX = 5 * 1024 * 1024;
+import { commitDrafts, discardImage, uploadImage } from "@/lib/upload";
+import { IMAGE_TYPES } from "@/lib/validation";
 
 export function MeView() {
   const ready = useRequireLogin();
@@ -28,7 +27,7 @@ export function MeView() {
   const { show, toast } = useFlashToast();
   const fileRef = useRef<HTMLInputElement>(null);
   const [nickname, setNickname] = useState<string>();
-  const [avatarUrl, setAvatarUrl] = useState<string>();
+  const [avatar, setAvatar] = useState<{ url: string; path: string }>();
   const [touched, setTouched] = useState(false);
   const [deleteId, setDeleteId] = useState<string>();
   const { busy, run } = useBusy();
@@ -43,13 +42,15 @@ export function MeView() {
 
   const pickAvatar = (file?: File) => {
     if (!file) return;
-    if (!AVATAR_TYPES.includes(file.type) || file.size > AVATAR_MAX) {
-      show({ variant: "error", message: "jpg, png, webp 이미지만 5MB 이하로 올릴 수 있어요." });
-      return;
-    }
-    const reader = new FileReader();
-    reader.onload = () => setAvatarUrl(String(reader.result));
-    reader.readAsDataURL(file);
+    return run(async () => {
+      try {
+        const uploaded = await uploadImage(file, "profile-image");
+        if (avatar) discardImage("profile-image", avatar.path);
+        setAvatar(uploaded);
+      } catch (error) {
+        show({ variant: "error", message: errorMessage(error, "사진을 올리지 못했어요.") });
+      }
+    });
   };
 
   const save = () => {
@@ -57,9 +58,10 @@ export function MeView() {
     if (nicknameError(draftName)) return;
     return run(async () => {
       try {
-        await actions.updateProfile({ nickname: draftName.trim() });
+        await actions.updateProfile({ nickname: draftName.trim(), imagePath: avatar?.path });
+        if (avatar) commitDrafts([avatar.path]);
         setNickname(undefined);
-        setAvatarUrl(undefined);
+        setAvatar(undefined);
         setTouched(false);
         show({ variant: "success", message: "프로필을 저장했어요" });
       } catch (error) {
@@ -79,7 +81,7 @@ export function MeView() {
       />
       <main className="mx-auto w-full max-w-page flex-1 md:grid md:grid-cols-[minmax(0,2fr)_minmax(0,3fr)] md:gap-x-(--spacing-32) md:px-(--spacing-20)">
         <div>
-          <ProfileSummary user={{ ...me, avatarUrl: avatarUrl ?? me.avatarUrl }} count={mine.length} />
+          <ProfileSummary user={{ ...me, avatarUrl: avatar?.url ?? me.avatarUrl }} count={mine.length} />
           <form
             noValidate
             onSubmit={(e) => {
@@ -89,17 +91,17 @@ export function MeView() {
             className="flex flex-col gap-(--spacing-16) px-(--spacing-20) pb-(--spacing-24)"
           >
             <h2 className="heading-sm text-text-default">프로필 설정</h2>
-            <Button variant="secondary" size="sm" icon="image" className="w-full" onClick={() => fileRef.current?.click()}>
+            <Button variant="secondary" size="sm" icon="image" className="w-full" disabled={busy} onClick={() => fileRef.current?.click()}>
               프로필 사진 변경
             </Button>
             <input
               ref={fileRef}
               type="file"
-              accept={AVATAR_TYPES.join(",")}
+              accept={IMAGE_TYPES.join(",")}
               aria-label="프로필 사진 파일"
               className="sr-only"
               onChange={(e) => {
-                pickAvatar(e.target.files?.[0]);
+                void pickAvatar(e.target.files?.[0]);
                 e.target.value = "";
               }}
             />

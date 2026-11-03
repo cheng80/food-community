@@ -37,7 +37,10 @@ export const actions = {
     set({ ...state, loggedIn: false, me: initial.me });
     await refreshAfterWrite();
   },
-  updateProfile: notReady<[{ nickname: string }]>("프로필 저장"),
+  async updateProfile(input: { nickname: string; imagePath?: string }) {
+    await send("/api/profile", "PATCH", input);
+    await refreshAfterWrite();
+  },
   createRestaurant: notReady<[RestaurantInput], string>("맛집 등록"),
   updateRestaurant: notReady<[string, RestaurantInput]>("맛집 수정"),
   deleteRestaurant: notReady<[string]>("맛집 삭제"),

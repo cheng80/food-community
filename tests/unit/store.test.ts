@@ -37,13 +37,19 @@ describe("store", () => {
     expect((await import("@/lib/store")).findUser({ me: { id: "new", nickname: "새" }, users: [] } as never, "new")?.nickname).toBe("새");
   });
 
+  it("프로필 저장 성공 후 bootstrap 실패는 저장 실패가 아니다", async () => {
+    vi.stubGlobal("fetch", vi.fn(async (url: string) => (url === "/api/bootstrap" ? respond(500, {}) : respond(200, { ok: true }))));
+    await expect(actions.updateProfile({ nickname: "맛집" })).resolves.toBeUndefined();
+    vi.stubGlobal("fetch", vi.fn(async () => respond(502, { error: "프로필을 저장하지 못했어요." })));
+    await expect(actions.updateProfile({ nickname: "맛집" })).rejects.toThrow("프로필을 저장하지 못했어요.");
+  });
+
   it("로그인 시작 실패는 호출자에게 전달한다", async () => {
     vi.stubGlobal("fetch", vi.fn(async () => respond(502, { error: "구글 로그인 연결을 확인해 주세요." })));
     await expect(actions.login("/")).rejects.toThrow("구글 로그인 연결을 확인해 주세요.");
   });
 
   it("이 단계에 없는 쓰기 기능은 성공처럼 보이지 않는다", async () => {
-    await expect(actions.updateProfile({ nickname: "맛집" })).rejects.toThrow("아직 연결되지");
     await expect(actions.createRestaurant({ name: "", address: "", content: "", photos: [] })).rejects.toThrow("아직 연결되지");
     await expect(actions.updateRestaurant("x", { name: "", address: "", content: "", photos: [] })).rejects.toThrow("아직 연결되지");
     await expect(actions.deleteRestaurant("x")).rejects.toThrow("아직 연결되지");

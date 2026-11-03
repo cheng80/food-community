@@ -14,6 +14,6 @@ export async function request<T>(url: string, options?: RequestInit): Promise<T>
   return body as T;
 }
 
-export function send<T>(url: string, method: string, body?: unknown) {
-  return request<T>(url, { method, headers: { "Content-Type": "application/json" }, body: body === undefined ? undefined : JSON.stringify(body) });
+export function send<T>(url: string, method: string, body?: unknown, keepalive = false) {
+  return request<T>(url, { method, keepalive, headers: { "Content-Type": "application/json" }, body: body === undefined ? undefined : JSON.stringify(body) });
 }
