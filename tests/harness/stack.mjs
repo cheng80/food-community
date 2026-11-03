@@ -14,7 +14,7 @@ if (!tools) throw new Error("VERIFY_TOOLS 경로가 필요해요 (docs/verify.md
 const pg = createRequire(path.join(tools, "package.json"))("pg");
 const native = path.join(tools, "node_modules/@embedded-postgres", readdirSync(path.join(tools, "node_modules/@embedded-postgres"))[0], "native");
 
-export const ports = { pg: 54398, rest: 54397, gateway: 54399, next: 3101, app: 3100 };
+export const ports = { pg: 54398, rest: 54397, gateway: 54399, next: 3101, app: 3100, naver: 4610 };
 export const JWT_SECRET = "local-verify-secret-local-verify-secret-0123";
 export const PUBLISHABLE_KEY = "sb_publishable_local_verify";
 const INGRESS_LIMIT = 4.5 * 1024 * 1024;
@@ -306,6 +306,8 @@ export async function startStack() {
   startRest();
   await waitFor(`http://127.0.0.1:${ports.rest}/`);
   const servers = [await gateway(pool), await ingress()];
+  const naver = spawn(process.execPath, [path.join(root, "postman/mocks/naver/default.js")], { stdio: "ignore", env: { ...process.env, PORT: String(ports.naver) } });
+  children.push(naver);
   const next = spawn(path.join(root, "node_modules/.bin/next"), ["start", "-p", String(ports.next)], {
     stdio: "ignore",
     env: {
@@ -315,6 +317,9 @@ export async function startStack() {
       SUPABASE_PUBLISHABLE_KEY: PUBLISHABLE_KEY,
       SUPABASE_STORAGE_URL: `http://127.0.0.1:${ports.gateway}/storage/v1/object/public`,
       APP_URL: `http://localhost:${ports.app}`,
+      NAVER_SEARCH_URL: `http://127.0.0.1:${ports.naver}/search/v1/local`,
+      NAVER_SEARCH_CLIENT_ID: "mock-id",
+      NAVER_SEARCH_CLIENT_SECRET: "mock-secret",
     },
   });
   children.push(next);

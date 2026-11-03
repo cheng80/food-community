@@ -7,15 +7,12 @@ import { NotFound, PageLoading } from "@/components/app/NotFound";
 import { Button } from "@/components/ui/Button";
 import { Toast } from "@/components/ui/Feedback";
 import { FileItem, FileUploader } from "@/components/ui/FileUploader";
-import { MapPreview } from "@/components/ui/MapPreview";
+import { NaverMap } from "@/components/app/NaverMap";
 import { Menu, MenuItem } from "@/components/ui/Menu";
 import { TopNavigation } from "@/components/ui/Navigation";
-import { BottomSheet } from "@/components/ui/Overlay";
-import { Select } from "@/components/ui/Select";
-import { SelectItem } from "@/components/ui/SelectItem";
 import { Textarea } from "@/components/ui/Textarea";
+import { PlaceSummary } from "@/components/ui/Place";
 import { TextField } from "@/components/ui/TextField";
-import { addressBook } from "@/lib/data";
 import { actions, useAppState, type RestaurantInput } from "@/lib/store";
 import { clearDraft, getDraft, updateDraft, useDraft, type DraftPhoto } from "@/lib/form-draft";
 import { commitDrafts, discardImage, uploadImage } from "@/lib/upload";
@@ -42,7 +39,7 @@ function Form({ editId, initial }: { editId?: string; initial?: { name: string; 
   const { busy, run } = useBusy();
   // 장소 선택 페이지를 다녀와도 입력과 사진을 유지하도록 페이지 밖 저장소에 둔다.
   const draftKey = editId ?? "new";
-  const { name, content, address, photos } = useDraft(draftKey, () => ({
+  const { name, content, address, place, photos } = useDraft(draftKey, () => ({
     name: initial?.name ?? "",
     content: initial?.content ?? "",
     address: initial?.address ?? "",
@@ -53,8 +50,6 @@ function Form({ editId, initial }: { editId?: string; initial?: { name: string; 
   const [submitted, setSubmitted] = useState(false);
   const [bannerOpen, setBannerOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
-  const [sheetOpen, setSheetOpen] = useState(false);
-  const [sheetQuery, setSheetQuery] = useState("");
 
   const ready = photos.filter((p) => p.status === "complete");
   const uploading = photos.some((p) => p.status === "uploading");
@@ -93,6 +88,8 @@ function Form({ editId, initial }: { editId?: string; initial?: { name: string; 
     updateDraft(draftKey, (d) => ({ photos: d.photos.filter((p) => p.key !== photo.key) }));
     if (photo.draft && photo.path) discardImage("place-image", photo.path);
   };
+
+  const openPlace = () => router.push(`/restaurants/place?for=${draftKey}`);
 
   /** 작성 취소: 저장하지 않은 이미지는 지우고 돌아간다. */
   const cancel = () => {
@@ -133,8 +130,6 @@ function Form({ editId, initial }: { editId?: string; initial?: { name: string; 
       }
     });
   };
-
-  const sheetResults = addressBook.filter((a) => a.includes(sheetQuery.trim()));
 
   return (
     <>
@@ -216,24 +211,19 @@ function Form({ editId, initial }: { editId?: string; initial?: { name: string; 
           </div>
 
           <div className="flex flex-col gap-(--spacing-8)">
-            <Select
-              size="lg"
-              label="주소 *"
-              placeholder="도로명, 지번으로 검색"
-              options={addressBook.map((a) => ({ value: a, label: a }))}
-              value={address || undefined}
-              errorText={show("address")}
-              onChange={(value) => updateDraft(draftKey, { address: value })}
-            />
-            <div className="flex gap-(--spacing-8)">
-              <Button variant="secondary" icon="search" className="w-[170px]" onClick={() => setSheetOpen(true)}>
-                주소 검색
-              </Button>
-              <Button variant="secondary" icon="map-pin" className="flex-1" onClick={() => router.push(`/restaurants/place?for=${draftKey}`)}>
-                장소 입력
-              </Button>
-            </div>
-            <MapPreview address={address || undefined} className="md:h-[240px]" />
+            <span className="label-lg text-text-default">장소 *</span>
+            <Button variant="secondary" size="lg" icon={place ? "edit" : "plus"} className="w-full" onClick={openPlace}>
+              {place ? "장소 다시 선택" : "장소 입력"}
+            </Button>
+            {show("address") && <span className="label-md text-text-error">{show("address")}</span>}
+            {place ? (
+              <>
+                <PlaceSummary name={place.name} address={place.address} onChange={openPlace} />
+                <NaverMap key={`${place.lat},${place.lng}`} center={place} marker className="h-[140px] rounded-xl md:h-[240px]" />
+              </>
+            ) : address ? (
+              <p className="body-md text-text-secondary">{address}</p>
+            ) : null}
           </div>
         </form>
       </main>
@@ -246,36 +236,6 @@ function Form({ editId, initial }: { editId?: string; initial?: { name: string; 
         </div>
       </div>
 
-      <BottomSheet open={sheetOpen} title="주소 검색" onClose={() => setSheetOpen(false)}>
-        <div className="flex w-full flex-col gap-(--spacing-12)">
-          <TextField
-            label="도로명, 지번"
-            icon="search"
-            placeholder="예: 광명로, 서신면"
-            value={sheetQuery}
-            autoFocus
-            onChange={(e) => setSheetQuery(e.target.value)}
-          />
-          <div role="listbox" aria-label="주소 검색 결과" className="flex max-h-[240px] flex-col overflow-y-auto">
-            {sheetResults.length > 0 ? (
-              sheetResults.map((a) => (
-                <SelectItem
-                  key={a}
-                  selected={a === address}
-                  onClick={() => {
-                    updateDraft(draftKey, { address: a });
-                    setSheetOpen(false);
-                  }}
-                >
-                  {a}
-                </SelectItem>
-              ))
-            ) : (
-              <p className="body-md py-(--spacing-12) text-center text-text-secondary">검색 결과가 없어요</p>
-            )}
-          </div>
-        </div>
-      </BottomSheet>
       {toast}
     </>
   );

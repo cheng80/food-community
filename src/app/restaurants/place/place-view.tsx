@@ -1,24 +1,125 @@
 "use client";
 
-import { useBack, useRequireLogin } from "@/components/app/hooks";
-import { NaverMap } from "@/components/app/NaverMap";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useRef, useState } from "react";
+import { errorMessage, useBack, useRequireLogin } from "@/components/app/hooks";
+import { NaverMap, type LatLngValue } from "@/components/app/NaverMap";
 import { PageLoading } from "@/components/app/NotFound";
+import { Button } from "@/components/ui/Button";
+import { Empty } from "@/components/ui/Empty";
 import { TopNavigation } from "@/components/ui/Navigation";
-import { AddressBox } from "@/components/ui/Place";
+import { AddressBox, PlaceResultItem } from "@/components/ui/Place";
 import { TextField } from "@/components/ui/TextField";
+import { request } from "@/lib/api";
+import { cx } from "@/lib/cx";
+import { getDraft, updateDraft } from "@/lib/form-draft";
+import type { PlaceResult } from "@/lib/naver-normalize";
 import { DEFAULT_CENTER } from "@/lib/naver-map";
+import { useIsDesktop } from "@/lib/use-desktop";
+import { isUuid } from "@/lib/validation";
 
 export function PlaceView() {
   const ready = useRequireLogin();
-  const back = useBack("/restaurants/new");
+  const router = useRouter();
+  const key = useSearchParams().get("for") ?? "new";
+  const formPath = isUuid(key) ? `/restaurants/${key}/edit` : "/restaurants/new";
+  const back = useBack(formPath);
+  const isDesktop = useIsDesktop();
+  const saved = getDraft(key)?.place;
+
+  const [query, setQuery] = useState("");
+  const [results, setResults] = useState<PlaceResult[] | null>(null);
+  const [searching, setSearching] = useState(false);
+  const [searchError, setSearchError] = useState<string>();
+  const [showMap, setShowMap] = useState(false);
+  const [center, setCenter] = useState<LatLngValue>(saved ?? DEFAULT_CENTER);
+  const [name, setName] = useState(saved?.name ?? "");
+  const [picked, setPicked] = useState<PlaceResult | null>(saved ?? null);
+  const searchControl = useRef<AbortController>(null);
+
+  // 새로고침으로 폼 저장소가 비면 저장할 곳이 없으므로 폼으로 돌려보낸다.
+  useEffect(() => { if (ready && !getDraft(key)) router.replace(formPath); }, [ready, key, formPath, router]);
+  useEffect(() => () => searchControl.current?.abort(), []);
+
   if (!ready) return <PageLoading />;
+
+  const search = async () => {
+    const text = query.trim();
+    if (!text) return;
+    searchControl.current?.abort();
+    const control = new AbortController();
+    searchControl.current = control;
+    setSearching(true);
+    setSearchError(undefined);
+    try {
+      const body = await request<{ results: PlaceResult[] }>("/api/naver/search", {
+        method: "POST",
+        signal: control.signal,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ query: text }),
+      });
+      if (!control.signal.aborted) setResults(body.results);
+    } catch (error) {
+      if (!control.signal.aborted) { setResults(null); setSearchError(errorMessage(error, "검색하지 못했어요.")); }
+    } finally {
+      if (!control.signal.aborted) setSearching(false);
+    }
+  };
+
+  const choose = (result: PlaceResult) => {
+    setName(result.name);
+    setPicked(result);
+    setCenter({ lat: result.lat, lng: result.lng });
+    setShowMap(true);
+  };
+
+  const pickOnMap = () => {
+    setName("");
+    setPicked(null);
+    setShowMap(true);
+  };
+
+  const canRegister = !!picked && !!name.trim();
+  const register = () => {
+    if (!picked) return;
+    updateDraft(key, { place: { ...picked, name: name.trim() }, address: picked.address });
+    back();
+  };
+
+  const mapVisible = isDesktop || showMap;
   return (
     <>
-      <TopNavigation title="장소 등록" onBack={back} moreIcon="home" moreLabel="이전 화면" onMore={back} />
-      <main className="mx-auto flex w-full max-w-page flex-1 flex-col gap-(--spacing-12) px-(--spacing-20) py-(--spacing-8)">
-        <TextField label="장소 검색" icon="search" size="lg" placeholder="장소 이름이나 주소로 검색" disabled helperText="검색은 다음 단계에서 연결돼요" />
-        <NaverMap center={DEFAULT_CENTER} centerPin className="h-[380px] rounded-xl" />
-        <AddressBox status="loading">주소 변환은 다음 단계에서 연결돼요</AddressBox>
+      <TopNavigation title="장소 등록" onBack={showMap && !isDesktop ? () => setShowMap(false) : back} moreIcon="home" moreLabel="폼으로 돌아가기" onMore={back} />
+      <main className="mx-auto flex w-full max-w-page flex-1 flex-col gap-(--spacing-16) px-(--spacing-20) pt-(--spacing-8) pb-(--spacing-24) lg:flex-row lg:gap-(--spacing-32)">
+        <div className={cx("flex flex-col gap-(--spacing-12) lg:w-[420px] lg:shrink-0", showMap && !isDesktop && "hidden")}>
+          <form noValidate onSubmit={(e) => { e.preventDefault(); void search(); }} className="flex items-end gap-(--spacing-8)">
+            <TextField label="장소 검색" size="lg" icon="search" type="search" placeholder="장소 이름이나 주소로 검색" value={query} maxLength={100} onChange={(e) => setQuery(e.target.value)} className="flex-1" />
+            <Button type="submit" size="lg" loading={searching}>검색</Button>
+          </form>
+          {searchError && <p role="alert" className="label-md text-text-error">{searchError}</p>}
+          {results && results.length > 0 && (
+            <div className="flex flex-col">
+              {results.map((result) => <PlaceResultItem key={`${result.lat},${result.lng},${result.name}`} name={result.name} address={result.address} onClick={() => choose(result)} />)}
+            </div>
+          )}
+          {results?.length === 0 ? (
+            <div className="flex justify-center py-(--spacing-24)">
+              <Empty title="검색 결과가 없어요" description="지도에서 위치를 고르고 장소명을 직접 입력해 주세요" primaryLabel="지도에서 직접 입력" onPrimary={pickOnMap} />
+            </div>
+          ) : (
+            <Button variant="secondary" icon="map-pin" className="w-full" onClick={pickOnMap}>
+              {results ? "찾는 곳이 없어요. 직접 입력" : "지도에서 직접 고르기"}
+            </Button>
+          )}
+        </div>
+        {mapVisible && (
+          <div className="flex min-w-0 flex-1 flex-col gap-(--spacing-12)">
+            <NaverMap center={center} centerPin className="h-[380px] rounded-xl lg:h-[520px]" />
+            <TextField label="장소명 *" size="lg" value={name} maxLength={60} onChange={(e) => setName(e.target.value)} />
+            {picked ? <AddressBox status="default">{picked.address}</AddressBox> : <AddressBox status="error">주소 변환은 다음 단계에서 연결돼요</AddressBox>}
+            <Button size="lg" className="w-full" disabled={!canRegister} onClick={register}>이 위치로 등록</Button>
+          </div>
+        )}
       </main>
     </>
   );

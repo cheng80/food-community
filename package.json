@@ -8,7 +8,7 @@
     "start": "next start",
     "lint": "eslint",
     "test": "vitest run --config vitest.node.config.ts --project unit",
-    "test:stack": "next build && node tests/harness/run.mjs",
+    "test:stack": "NEXT_PUBLIC_NAVER_MAP_CLIENT_ID=mock-id NEXT_PUBLIC_NAVER_MAP_SDK_URL=http://127.0.0.1:4610/openapi/v3/maps.js next build && node tests/harness/run.mjs",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build"
   },

@@ -16,6 +16,8 @@ function search(req, res, url) {
   const display = Number(url.searchParams.get("display") ?? 1);
   if (!query) return json(res, 400, { errorCode: "SE01", errorMessage: "Incorrect query request" });
   if (!Number.isInteger(display) || display < 1 || display > 5) return json(res, 400, { errorCode: "SE02", errorMessage: "Invalid display value" });
+  if (query === "오류401") return json(res, 401, unauthorized);
+  if (query === "오류404") return json(res, 404, { errorCode: "SE05", errorMessage: "Invalid search api" });
   if (query === "오류429") return json(res, 429, quota);
   if (query === "오류500") return json(res, 500, { errorCode: "SE99", errorMessage: "System Error" });
   if (query === "오류503") return json(res, 503, { error: { errorCode: "500", message: "Endpoint Error" } });
