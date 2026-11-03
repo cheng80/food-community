@@ -48,3 +48,24 @@ export function toPlaceResults(items: unknown): PlaceResult[] {
     return name && address && lat !== null && lng !== null ? [{ name, address, lat, lng }] : [];
   });
 }
+
+const areaName = (region: Record<string, { name?: unknown }> | undefined, key: string) => {
+  const name = region?.[key]?.name;
+  return typeof name === "string" ? name.trim() : "";
+};
+
+/**
+ * Reverse 응답의 addr 결과를 지번 주소로 조합한다. 예: 대구광역시 동구 도학동 산 45-6
+ * 시/도, 읍/면/동, 본번 중 하나라도 없으면 완전한 주소가 아니므로 null이다. 세종시처럼 시/군/구가 없는 곳은 허용한다.
+ */
+export function formatJibun(results: unknown) {
+  if (!Array.isArray(results)) return null;
+  const addr = results.find((result) => result?.name === "addr");
+  if (!addr) return null;
+  const [area1, area2, area3, area4] = ["area1", "area2", "area3", "area4"].map((key) => areaName(addr.region, key));
+  const main = typeof addr.land?.number1 === "string" ? addr.land.number1.trim() : "";
+  const sub = typeof addr.land?.number2 === "string" ? addr.land.number2.trim() : "";
+  if (!area1 || !area3 || !main) return null;
+  const number = `${addr.land.type === "2" ? "산 " : ""}${main}${sub && sub !== "0" ? `-${sub}` : ""}`;
+  return [area1, area2, area3, area4, number].filter(Boolean).join(" ");
+}

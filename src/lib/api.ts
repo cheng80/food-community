@@ -6,7 +6,8 @@ export async function request<T>(url: string, options?: RequestInit): Promise<T>
   let response: Response;
   try {
     response = await fetch(url, { ...options, cache: "no-store", credentials: "same-origin" });
-  } catch {
+  } catch (error) {
+    if (error instanceof Error && error.name === "AbortError") throw error;
     throw new RequestError(0, "네트워크 연결을 확인해 주세요.");
   }
   const body = await response.json().catch(() => null);

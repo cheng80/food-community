@@ -320,6 +320,9 @@ export async function startStack() {
       NAVER_SEARCH_URL: `http://127.0.0.1:${ports.naver}/search/v1/local`,
       NAVER_SEARCH_CLIENT_ID: "mock-id",
       NAVER_SEARCH_CLIENT_SECRET: "mock-secret",
+      NAVER_REVERSE_URL: `http://127.0.0.1:${ports.naver}/map-reversegeocode/v2/gc`,
+      NEXT_PUBLIC_NAVER_MAP_CLIENT_ID: "mock-id",
+      NAVER_MAP_CLIENT_SECRET: "mock-secret",
     },
   });
   children.push(next);

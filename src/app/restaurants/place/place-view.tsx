@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { errorMessage, useBack, useRequireLogin } from "@/components/app/hooks";
 import { NaverMap, type LatLngValue } from "@/components/app/NaverMap";
 import { PageLoading } from "@/components/app/NotFound";
@@ -15,8 +15,17 @@ import { cx } from "@/lib/cx";
 import { getDraft, updateDraft } from "@/lib/form-draft";
 import type { PlaceResult } from "@/lib/naver-normalize";
 import { DEFAULT_CENTER } from "@/lib/naver-map";
+import { createReverseLookup, type ReverseState } from "@/lib/reverse-lookup";
 import { useIsDesktop } from "@/lib/use-desktop";
 import { isUuid } from "@/lib/validation";
+
+const fetchAddress = (lat: number, lng: number, signal: AbortSignal) =>
+  request<{ address: string | null }>("/api/naver/reverse", {
+    method: "POST",
+    signal,
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ lat, lng }),
+  }).then((body) => body.address);
 
 export function PlaceView() {
   const ready = useRequireLogin();
@@ -34,12 +43,13 @@ export function PlaceView() {
   const [showMap, setShowMap] = useState(false);
   const [center, setCenter] = useState<LatLngValue>(saved ?? DEFAULT_CENTER);
   const [name, setName] = useState(saved?.name ?? "");
-  const [picked, setPicked] = useState<PlaceResult | null>(saved ?? null);
+  const [reverse, setReverse] = useState<ReverseState>(saved ? { status: "ok", address: saved.address, lat: saved.lat, lng: saved.lng } : { status: "idle" });
   const searchControl = useRef<AbortController>(null);
+  const lookup = useMemo(() => createReverseLookup(fetchAddress, setReverse, saved ? { address: saved.address, lat: saved.lat, lng: saved.lng } : undefined), [saved]);
 
   // 새로고침으로 폼 저장소가 비면 저장할 곳이 없으므로 폼으로 돌려보낸다.
   useEffect(() => { if (ready && !getDraft(key)) router.replace(formPath); }, [ready, key, formPath, router]);
-  useEffect(() => () => searchControl.current?.abort(), []);
+  useEffect(() => () => { searchControl.current?.abort(); lookup.dispose(); }, [lookup]);
 
   if (!ready) return <PageLoading />;
 
@@ -68,21 +78,22 @@ export function PlaceView() {
 
   const choose = (result: PlaceResult) => {
     setName(result.name);
-    setPicked(result);
+    lookup.select(result);
     setCenter({ lat: result.lat, lng: result.lng });
     setShowMap(true);
   };
 
+  // 결과 없음의 직접 입력은 현재 중심을 유지하고 그 자리의 주소를 찾는다.
   const pickOnMap = () => {
     setName("");
-    setPicked(null);
+    lookup.clear();
     setShowMap(true);
   };
 
-  const canRegister = !!picked && !!name.trim();
+  const canRegister = reverse.status === "ok" && !!name.trim();
   const register = () => {
-    if (!picked) return;
-    updateDraft(key, { place: { ...picked, name: name.trim() }, address: picked.address });
+    if (reverse.status !== "ok" || !name.trim()) return;
+    updateDraft(key, { place: { name: name.trim(), address: reverse.address, lat: reverse.lat, lng: reverse.lng }, address: reverse.address });
     back();
   };
 
@@ -114,9 +125,11 @@ export function PlaceView() {
         </div>
         {mapVisible && (
           <div className="flex min-w-0 flex-1 flex-col gap-(--spacing-12)">
-            <NaverMap center={center} centerPin className="h-[380px] rounded-xl lg:h-[520px]" />
+            <NaverMap center={center} centerPin onCenterChange={lookup.moved} onIdle={lookup.settled} className="h-[380px] rounded-xl lg:h-[520px]" />
             <TextField label="장소명 *" size="lg" value={name} maxLength={60} onChange={(e) => setName(e.target.value)} />
-            {picked ? <AddressBox status="default">{picked.address}</AddressBox> : <AddressBox status="error">주소 변환은 다음 단계에서 연결돼요</AddressBox>}
+            <AddressBox status={reverse.status === "ok" ? "default" : reverse.status === "empty" || reverse.status === "error" ? "error" : "loading"}>
+              {reverse.status === "ok" ? reverse.address : reverse.status === "empty" ? "주소를 찾을 수 없는 위치예요" : reverse.status === "error" ? reverse.message : "주소를 확인하는 중이에요"}
+            </AddressBox>
             <Button size="lg" className="w-full" disabled={!canRegister} onClick={register}>이 위치로 등록</Button>
           </div>
         )}

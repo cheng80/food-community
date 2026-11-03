@@ -1,9 +1,11 @@
 import "server-only";
-import { toPlaceResults } from "@/lib/naver-normalize";
+import { formatJibun, toPlaceResults } from "@/lib/naver-normalize";
 import { ApiError } from "./http";
 
 const TIMEOUT_MS = 5000;
 const SEARCH_URL = process.env.NAVER_SEARCH_URL || "https://naverapihub.apigw.ntruss.com/search/v1/local";
+
+const REVERSE_URL = process.env.NAVER_REVERSE_URL || "https://maps.apigw.ntruss.com/map-reversegeocode/v2/gc";
 
 const KEY_MISSING = () => new ApiError(503, "네이버 API 키 설정을 준비 중이에요.");
 
@@ -34,4 +36,16 @@ export async function searchPlaces(query: string) {
   const params = new URLSearchParams({ query, display: "5", start: "1", format: "json" });
   const body = await getJson(`${SEARCH_URL}?${params}`, { "X-NCP-APIGW-API-KEY-ID": id, "X-NCP-APIGW-API-KEY": secret });
   return toPlaceResults(body?.items);
+}
+
+/** 바다처럼 주소가 없는 좌표(status.code 3)와 불완전한 주소는 null이다. */
+export async function reverseAddress(lat: number, lng: number) {
+  const id = process.env.NEXT_PUBLIC_NAVER_MAP_CLIENT_ID;
+  const secret = process.env.NAVER_MAP_CLIENT_SECRET;
+  if (!id || !secret) throw KEY_MISSING();
+  const params = new URLSearchParams({ coords: `${lng},${lat}`, orders: "addr", output: "json" });
+  const body = await getJson(`${REVERSE_URL}?${params}`, { "x-ncp-apigw-api-key-id": id, "x-ncp-apigw-api-key": secret });
+  if (body?.status?.code === 3) return null;
+  if (body?.status?.code !== 0) throw new ApiError(502, "네이버 응답에 문제가 있어요. 다시 시도해 주세요.");
+  return formatJibun(body.results);
 }

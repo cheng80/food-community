@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { parseCoord, plainText, toPlaceResults } from "@/lib/naver-normalize";
+import { formatJibun, parseCoord, plainText, toPlaceResults } from "@/lib/naver-normalize";
 
 describe("plainText", () => {
   it("검색 강조 태그를 지우고 엔티티를 평문으로 바꾼다", () => {
@@ -31,5 +31,22 @@ describe("toPlaceResults", () => {
   it("쓸 수 없는 항목은 뺀다", () => {
     expect(toPlaceResults([{ ...ok, title: "<b></b>" }, { ...ok, address: "" }, { ...ok, mapx: "abc" }, { ...ok, mapy: "0" }, null])).toEqual([]);
     expect(toPlaceResults(undefined)).toEqual([]);
+  });
+});
+
+describe("formatJibun", () => {
+  const addr = (areas: string[], land: object) => [{ name: "addr", region: Object.fromEntries(areas.map((name, i) => [`area${i + 1}`, { name }])), land }];
+  it("시/도부터 리, 산, 본번-부번까지 조합한다", () => {
+    expect(formatJibun(addr(["서울특별시", "중구", "태평로1가", ""], { type: "1", number1: "31", number2: "" }))).toBe("서울특별시 중구 태평로1가 31");
+    expect(formatJibun(addr(["전라남도", "광양시", "광양읍", "읍내리"], { type: "1", number1: "123", number2: "4" }))).toBe("전라남도 광양시 광양읍 읍내리 123-4");
+    expect(formatJibun(addr(["대구광역시", "동구", "도학동", ""], { type: "2", number1: "45", number2: "6" }))).toBe("대구광역시 동구 도학동 산 45-6");
+    expect(formatJibun(addr(["세종특별자치시", "", "어진동", ""], { type: "1", number1: "573", number2: "0" }))).toBe("세종특별자치시 어진동 573");
+  });
+  it("행정구역이나 번지가 빠지면 주소로 인정하지 않는다", () => {
+    expect(formatJibun(addr(["경기도", "", "", ""], { type: "1", number1: "1", number2: "" }))).toBeNull();
+    expect(formatJibun(addr(["", "중구", "태평로1가", ""], { type: "1", number1: "1", number2: "" }))).toBeNull();
+    expect(formatJibun(addr(["서울특별시", "중구", "태평로1가", ""], { type: "1", number1: "", number2: "" }))).toBeNull();
+    expect(formatJibun([{ name: "legalcode" }])).toBeNull();
+    expect(formatJibun(undefined)).toBeNull();
   });
 });
