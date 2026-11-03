@@ -9,9 +9,10 @@
 | 1 | `02-food-pm-skills-prd-update` (`.git` 제외 실제 복사) | `02-prd.md` v0.4. 원본과 바이트 동일 |
 | 2 | `33-food-deploy-pwa` HEAD `9e494ae` (`git archive`) | `design.pen`, `src`, `.storybook`, 토큰·디자인 문서 보강. 02의 PRD는 덮어쓰지 않음 |
 
-- 제외: `.git`, `.env.local`, `.vercel`, `.next`, `node_modules`, `tsconfig.tsbuildinfo`, `references`, `postman`, `supabase`, Day55~59 문서·렌더.
+- 제외: `.git`, `.env.local`, `.vercel`, `.next`, `node_modules`, `tsconfig.tsbuildinfo`, `references`, `postman`, Day55~59 문서·렌더.
+- 포함: `supabase/migrations`의 migration 6개. 출처는 33 HEAD `9e494ae`이며 파일 내용이 같다. 기존 스키마 참고용이자 `tests/unit/validation.test.ts`가 읽는 입력이다. 실행하지 않았고 DB를 변경하지 않았다.
 - 원격은 상속하지 않았다. 독립 로컬 repo이며 remote가 없다. 원본 02·33은 변경하지 않았다.
-- `package.json`, `package-lock.json` root name은 `03-food-design-payment`.
+- `package.json`, `package-lock.json` root name은 03 복제 당시 `03-food-design-payment`였고, 04의 현재 이름은 `04-food-handoff-payment`다.
 
 ## Pencil 변경 (`design.pen`)
 
