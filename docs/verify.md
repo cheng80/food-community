@@ -29,3 +29,11 @@ VERIFY_TOOLS=... node tests/harness/run.mjs --serve  # 브라우저 확인, http
 브라우저 확인은 `--serve`로 띄운 뒤 `http://localhost:3100`에서 한다. 구글 화면 없이 가짜 Auth가 바로 callback으로 돌려보낸다.
 
 포트 3100, 3101, 54397~54399를 쓴다. DB는 임시 폴더에 만들어 실행마다 초기화된다.
+
+지도를 확인할 때는 mock을 띄우고 빌드에 공개 ID와 SDK 주소를 넣는다. 실제 SDK 동작을 보증하지 않는다.
+
+```sh
+NEXT_PUBLIC_NAVER_MAP_CLIENT_ID=mock-id NEXT_PUBLIC_NAVER_MAP_SDK_URL=http://127.0.0.1:4610/openapi/v3/maps.js npx next build
+```
+
+공개 ID가 없는 빌드는 지도 대신 키 설정 안내를 표시한다.
