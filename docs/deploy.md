@@ -1,6 +1,11 @@
 # Vercel 배포 준비
 
-아직 배포하지 않았다. 계정, 프로젝트, 공개 주소가 정해지면 `33-food-deploy-pwa`에서 아래 순서로 진행한다.
+Production 배포 완료(2026-11-03): https://food-community-nine.vercel.app
+
+- 팀 `virtues1`, 프로젝트 `food-community`(`prj_m310wP0h72laLD49qbw0RMBAFqDt`), deployment `dpl_BP6v8ou7CjpMxYav8gSPT2sZ2RqP`, 지역 `fra1`, Node 24.x, 소스 커밋 `8c7fe0a`. Git 연결 없이 CLI로 올렸다.
+- `APP_URL`은 위 주소다. 다른 alias `food-community-virtues1.vercel.app`은 `APP_URL`과 달라 쓰기 요청이 403이므로 안내하지 않는다.
+
+다시 배포할 때는 `33-food-deploy-pwa`에서 아래 순서로 진행한다.
 
 ## 설정
 
@@ -22,7 +27,7 @@ Vercel Project Settings > Environment Variables의 Production에 넣는다. `.en
 | `NAVER_SEARCH_CLIENT_ID` | API HUB Client ID | 서버 |
 | `NAVER_SEARCH_CLIENT_SECRET` | API HUB Client Secret | 서버 |
 
-`service_role`은 넣지 않는다. `NEXT_PUBLIC_` 값을 바꾸면 다시 빌드해야 한다.
+`vercel link`는 `.env.local`에 `VERCEL_OIDC_TOKEN`을 덧붙일 수 있다. 앱에 필요 없으니 그 줄은 지운다. `service_role`은 넣지 않는다. `NEXT_PUBLIC_` 값을 바꾸면 다시 빌드해야 한다.
 
 `APP_URL`은 쓰기 요청의 Origin 검사와 OAuth 복귀 주소에 쓰인다. 값이 접속 주소와 다르면 쓰기가 403으로 막히므로, 주소마다 값이 달라지는 Preview 배포는 쓰기 검증에 쓰지 않고 Production 주소로 확인한다.
 
@@ -30,7 +35,6 @@ Vercel Project Settings > Environment Variables의 Production에 넣는다. `.en
 
 ```sh
 cd 33-food-deploy-pwa
-npx vercel login
 npx vercel link
 npx vercel deploy --prod
 ```
@@ -53,6 +57,6 @@ npx vercel deploy --prod
 ## 배포 후 확인
 
 1. 비로그인 목록, 구글 로그인 후 원래 경로 복귀, 로그아웃.
-2. 정확히 10MB 사진 등록. 업로드는 4MB 조각이라 Vercel 4.5MB 요청 제한 아래이지만 실제 Storage는 localhost 앱에서 정확히 10MB 파일로 확인했고 **실제 Vercel에서는 아직 검증하지 않았다.**
+2. 정확히 10MB 사진 등록. 업로드는 4MB 조각이라 Vercel 4.5MB 요청 제한 아래다. 실제 Vercel에서 10,485,760바이트 테스트 파일(PNG에 0을 덧붙인 파일)로 통과했다. 실제 10MB 음식 사진은 올려 보지 않았다.
 3. 장소 검색, 지도 드래그 주소, 상세 지도.
-4. 휴대폰에서 설치 안내와 홈 화면 추가.
+4. 휴대폰에서 설치 안내와 홈 화면 추가. **실기기에서는 아직 확인하지 않았다.**
