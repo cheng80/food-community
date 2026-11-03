@@ -1,6 +1,6 @@
 # Day55 맛집 커뮤니티 데이터 설계
 
-Hi-Fi 핸드오프(`12-food-handoff-hi-fi`의 화면 코드와 Storybook)와 PRD v0.3에서 화면 데이터를 추출해 정규화했다. `design.pen`은 암호화 형식이라 직접 읽지 않고, 그 6개 화면을 옮긴 핸드오프 코드를 근거로 삼았다. 전체 표는 [data-dictionary.xlsx](data-dictionary.xlsx)에 있다.
+`design.pen`(UTF-8 JSON, version 2.21)의 01~06 화면 노드 텍스트를 직접 읽어 핸드오프 코드, PRD v0.3과 대조하고 화면 데이터를 정규화했다. 전체 표는 [data-dictionary.xlsx](data-dictionary.xlsx)에 있다.
 
 ## 관계
 
@@ -58,3 +58,7 @@ erDiagram
 ## 검증 상태
 
 로컬 실제 Postgres와 PostgREST에 migration을 적용해 제약과 RLS를 확인했다(`tests/e2e/schema.test.ts`, `docs/verify.md`). Storage 정책은 실제 Postgres의 `storage.objects` 스텁에서 확인했고 Storage 서버는 가짜다. 실제 Supabase 프로젝트 적용과 Google OAuth 연결은 **아직 하지 않았다**.
+
+## 정정 이력
+
+첫 판에는 `design.pen`이 암호화 형식이라 직접 읽지 않았다고 적었으나, 파일을 확인하지 않고 쓴 잘못된 문구였다. 실제로는 일반 JSON이며, 다시 읽어 대조한 결과 추출표의 필드는 일치했다. 다만 시안 카드의 한 줄 소개는 상세 본문과 다른 문장이다. PRD의 "내용 일부"에 맞춰 별도 컬럼을 두지 않고 `place.content`를 잘라 표시한다.
