@@ -1,0 +1,73 @@
+다음 디자인시스템 가이드에 맞게 타이포그래피 프리미티브 토큰 생성, 텍스트 컴포넌트 생성, 타이포그래피 파운데이션을 렌더할 것.
+
+===
+
+1. 폰트
+    - 대상: variables 메뉴
+    - font-family: "Pretendard Variable" (string)
+    - 폰트 파일: PretendardVariable.woff2
+    - 주의사항: 폰트가 설치되어 있지 않으면 공식 배포본(orioncactus/pretendard)에서 받아 프로젝트 fonts/ 폴더에 두고,
+      Pencil(pen.dev)이 지원하는 방식(문서 Custom Fonts)으로 등록한다. 가짜 family 이름으로 성공 처리 금지.
+
+2. 프리미티브 토큰 생성
+    - 대상: variables 메뉴
+    - font-size (number)
+        - font-size-900: 40
+        - font-size-800: 36
+        - font-size-700: 32
+        - font-size-600: 28
+        - font-size-500: 24
+        - font-size-400: 20
+        - font-size-300: 16
+        - font-size-200: 14
+        - font-size-100: 12
+    - font-weight (string)
+        - font-weight-bold: "700"
+        - font-weight-semibold: "600"
+        - font-weight-regular: "400"
+    - font-line-height (number)
+        - font-line-height-tight: 1.2
+        - font-line-height-normal: 1.4
+
+3. 텍스트 스타일 (공통 자간 -2%)
+    - display-lg : font-size-800 / font-weight-bold     / font-line-height-tight
+    - display-md : font-size-700 / font-weight-bold     / font-line-height-tight
+    - display-sm : font-size-600 / font-weight-bold     / font-line-height-tight
+    - heading-lg : font-size-500 / font-weight-bold     / font-line-height-tight
+    - heading-md : font-size-400 / font-weight-bold     / font-line-height-tight
+    - heading-sm : font-size-300 / font-weight-semibold / font-line-height-tight
+    - body-lg    : font-size-300 / font-weight-regular  / font-line-height-normal
+    - body-md    : font-size-200 / font-weight-regular  / font-line-height-normal
+    - label-lg   : font-size-200 / font-weight-semibold / font-line-height-normal
+    - label-md   : font-size-100 / font-weight-regular  / font-line-height-normal
+    - 자간: 모든 스타일 -2%. Pencil의 letterSpacing 단위를 확인하고, px 단위라면 각 fontSize × -0.02 px로 넣는다.
+
+4. 타이포그래피 렌더
+    - 대상: 신규 프레임 1개 (Typography Foundation)
+    - 방식: 스타일별로 1행씩 렌더
+    - 각 행의 스타일 텍스트 노드 자체를 reusable component로 만든다 (총 10개).
+    - wrapper/row 프레임은 reusable 금지. 이 용도로 다른 신규 프레임을 중복 생성하지 않는다.
+
+5. 기존 시안 리팩토링
+    - 기존 시안 안의 모든 텍스트를 위 10종 텍스트 컴포넌트의 인스턴스로 바꾼다.
+    - 같은 스타일이 없으면 가장 가까운 스타일로 매핑한다.
+    - 원래 문구, 의미/색상(기존 시맨틱 컬러 토큰), 아이콘, 이미지, 레이아웃을 보존하고 텍스트 잘림을 검사한다.
+    - 인스턴스에는 content / fill / 정당한 layout(textGrowth, width)만 override한다.
+      typography 속성을 직접 override해서 컴포넌트 연결을 무효화하지 않는다.
+
+6. 최종 검토사항
+    - [ ] 프리미티브 토큰 이름과 값이 올바른지 확인
+    - [ ] 신규 프레임 1개, reusable 텍스트 10개, wrapper reusable 0개인지 확인
+    - [ ] 시안의 미전환 텍스트가 0개인지 확인 (아이콘은 텍스트가 아니므로 별도 집계)
+    - [ ] 변수 참조와 인스턴스 참조가 모두 해석되는지 확인
+    - [ ] -2% 자간이 실제 의미(px 환산)대로 들어갔는지 확인
+    - [ ] Pretendard가 실제로 렌더되는지 확인 (한글 포함)
+    - [ ] 잘림 / placeholder / 미정의 참조가 없는지, Before/After 레이아웃을 눈으로 비교
+
+=== 추가 적용 단계 ===
+지금 화면에 있는 디자인 시안의 모든 텍스트를 방금 만든 타이포그래피 컴포넌트로 리팩토링해줘.
+동일한 스타일이 없으면 가장 가까운 스타일로 바꿔줘.
+리팩토링 결과가 정상적으로 적용되었는지 확인해줘.
+(코디네이터 지시: 원본 3종 × orange/mint/violet/dark 테마 = 12개 화면 전체에 적용. 컬러 팔레트 등 가이드 프레임의 설명 텍스트는 대상 아님.)
+
+출처: https://lms.codebootcamp.co.kr/my/materials/a1f6bc1e-4d03-4410-a4d1-4323770f4eb8

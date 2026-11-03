@@ -1,0 +1,35 @@
+{
+  "provider": "built-in image_gen",
+  "assets": [
+    {
+      "name": "bento-v1",
+      "source": "/Users/cheng80/.codex/generated_images/01a19f04-5ab4-7e11-997d-7337307f874a/exec-c4116077-f2d2-4c45-8de9-62b2568498ed.png",
+      "prompt": "Use case: stylized-concept. Premium friendly rounded clay 3D illustration for a Korean cooking workshop banner. Soft matte ivory, brand orange #ff5a1f, warm rice-white, muted natural food colours. Isometric three-quarter view, gentle upper-left studio light, subtle self-shadow. No text, letters, brands, watermark, background plane, frame or people. Actual transparent alpha background, centered complete objects with comfortable transparent margins, clean silhouette, no checkerboard pattern. Subject: exactly one open modern bento lunchbox, orange rounded box with white rice, rolled omelette, broccoli and tiny carrot pieces. Charming tactile food forms, appetizing and simple. Square 1024x1024 transparent PNG."
+    },
+    {
+      "name": "sushi-five-v1",
+      "source": "/Users/cheng80/.codex/generated_images/01a19f04-5ab4-7e11-997d-7337307f874a/exec-5081bb74-501e-4a4c-8515-bb90061b1aee.png",
+      "prompt": "Use case: stylized-concept. Premium friendly rounded clay 3D illustration for a Korean cooking workshop banner. Soft matte ivory, brand orange #ff5a1f, warm rice-white, muted natural food colours. Isometric three-quarter view, gentle upper-left studio light, subtle self-shadow. No text, letters, brands, watermark, background plane, frame or people. Actual transparent alpha background, centered complete objects with comfortable transparent margins, clean silhouette, no checkerboard pattern. Subject: exactly FIVE pieces of sushi as one grouped cutout: two salmon nigiri, one tuna nigiri, one shrimp nigiri and one seaweed-wrapped tamago sushi. Count must be five, no plate or chopsticks. Loosely staggered arrangement, each piece distinct. Square 1024x1024 transparent PNG."
+    },
+    {
+      "name": "sauce-pots-two-v1",
+      "source": "/Users/cheng80/.codex/generated_images/01a19f04-5ab4-7e11-997d-7337307f874a/exec-1e282c7f-a03e-4ccd-9afc-1342dd769363.png",
+      "prompt": "Use case: stylized-concept. Premium friendly rounded clay 3D illustration for a Korean cooking workshop banner. Soft matte ivory, brand orange #ff5a1f, warm rice-white, muted natural food colours. Isometric three-quarter view, gentle upper-left studio light, subtle self-shadow. No text, letters, brands, watermark, background plane, frame or people. Actual transparent alpha background, centered complete objects with comfortable transparent margins, clean silhouette, no checkerboard pattern. Subject: exactly TWO small rounded ceramic dipping sauce pots, one ivory shallow pot with dark soy sauce, one orange taller pot with creamy pale sauce. Pots are separate but grouped, no extra food or utensils. Square 1024x1024 transparent PNG."
+    },
+    {
+      "name": "paper-texture-v1",
+      "source": "/Users/cheng80/.codex/generated_images/01a19f04-5ab4-7e11-997d-7337307f874a/exec-f6775fdb-542d-4789-81b5-bdc9c566d9f4.png",
+      "prompt": "Use case: ads-marketing. Asset type: blank paper texture background for a Korean cooking workshop banner. Primary request: warm ivory uncoated artisan paper texture, nearly white #fff1ea tint, extremely subtle visible fine fibre and natural grain, soft even flat light, smooth clean centre, no folds, lines, objects, text, logos, stains, border or shadow. Landscape high resolution image, entire image is paper texture only. Opaque background."
+    },
+    {
+      "name": "banner-mobile-v1",
+      "source": "/Users/cheng80/.codex/generated_images/01a19f04-5ab4-7e11-997d-7337307f874a/exec-91c46fb0-5d1b-4645-99a5-35c80e12b2d2.png",
+      "prompt": "Use case: ads-marketing. Create a finished premium Korean cooking-class promotion raster banner using the FOUR supplied images as supporting visual references: orange bento box, exactly five sushi pieces, exactly two sauce pots, warm subtle paper texture. Match their friendly rounded clay 3D look. Main requirement: generous spatial negative space, warm off-white paper texture, premium simple layout. About half of the decorative object groups should extend beyond the banner boundaries and be deliberately cropped, while the headline and CTA remain entirely visible and legible. Brand orange #ff5a1f, neutral nearly-black #1a1a1a, ivory. Korean modern sans-serif typography like Pretendard, bold headline, concise orange rounded CTA. Text must be EXACTLY: headline '심심한 주말 놓치지 아까운 기회' and button '요리 수업 알아보기'. No other text, numbers, logos, watermark. No people. This is a cooking community's cooking workshop ad, not a payment or banking ad. Requested output 720 by 360 pixels, 2:1 wide banner. Put headline in two balanced lines in the left-centre with CTA below, large clear breathing room around text. Bento partly cropped off upper-right, grouped sushi partly cropped off lower-right, sauce pots smaller near lower edge. Keep centre airy, not cluttered. Compose all content for this exact 2:1 canvas."
+    },
+    {
+      "name": "banner-desktop-v1",
+      "source": "/Users/cheng80/.codex/generated_images/01a19f04-5ab4-7e11-997d-7337307f874a/exec-ed7a7855-fa23-43ef-a53d-8131e329fba2.png",
+      "prompt": "Use case: ads-marketing. Create a finished premium Korean cooking-class promotion raster banner using the FOUR supplied images as supporting visual references: orange bento box, exactly five sushi pieces, exactly two sauce pots, warm subtle paper texture. Match their friendly rounded clay 3D look. Main requirement: generous spatial negative space, warm off-white paper texture, premium simple layout. About half of the decorative object groups should extend beyond the banner boundaries and be deliberately cropped, while the headline and CTA remain entirely visible and legible. Brand orange #ff5a1f, neutral nearly-black #1a1a1a, ivory. Korean modern sans-serif typography like Pretendard, bold headline, concise orange rounded CTA. Text must be EXACTLY: headline '심심한 주말 놓치지 아까운 기회' and button '요리 수업 알아보기'. No other text, numbers, logos, watermark. No people. This is a cooking community's cooking workshop ad, not a payment or banking ad. Requested output 2480 by 806 pixels, very wide 3.077:1 desktop banner. This must be a fresh spatial re-layout, not a stretched mobile design. Place headline as an elegant two-line block slightly left of centre with CTA below, leave dramatic breathing room. Larger bento cropped across upper-right edge, grouped sushi cropped along lower-right and a sauce pot group partly clipped near far-left bottom. Wide, spacious editorial composition."
+    }
+  ]
+}
