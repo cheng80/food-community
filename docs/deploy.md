@@ -4,7 +4,7 @@
 
 ## 설정
 
-- 프레임워크 Next.js, 빌드 `next build`, Node 24 (`package.json`의 `engines`), 함수 지역 서울 `icn1` (`vercel.json`). DB 프로젝트를 서울로 만든다는 전제이며, 다른 지역이면 맞춘다.
+- 프레임워크 Next.js, 빌드 `next build`, Node 24 (`package.json`의 `engines`), 함수 지역 Frankfurt `fra1` (`vercel.json`). Supabase 프로젝트 `npppyzvtktntjobjnliz`의 지역 Frankfurt(`eu-central-1`)에 맞췄다.
 - 코드 저장소 연결 없이 CLI로 올릴 수 있다. Git 연결은 원격 push 승인 후 고른다.
 
 ## 환경변수
