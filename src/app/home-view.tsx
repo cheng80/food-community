@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { InstallPrompt } from "@/components/app/InstallPrompt";
 import { RestaurantGrid } from "@/components/app/RestaurantCard";
 import { Button } from "@/components/ui/Button";
 import { Empty } from "@/components/ui/Empty";
@@ -62,6 +63,7 @@ export function HomeView() {
         className="sticky top-0 z-30"
       />
       <main className="mx-auto w-full max-w-page flex-1 pb-20">
+        <InstallPrompt />
         <div className="px-(--spacing-20) py-(--spacing-8)">
           <TextField
             type="search"
