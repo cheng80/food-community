@@ -39,10 +39,10 @@ erDiagram
 
 | 순서 | migration | 도입 단계 | 내용 |
 | --- | --- | --- | --- |
-| 1 | `community_base` | Day55·18 | 테이블, 트리거, RLS, `profile-image`·`place-image` 버킷 |
-| 2 | `upload_chunk_bucket` | 19 | 10MB를 BFF로 받기 위한 비공개 청크 버킷 |
-| 3 | `save_place` | 20 | 글과 이미지 경로를 한 트랜잭션으로 저장하는 RPC |
-| 4 | `place_soft_delete` | 21 | `deleted_at`, 삭제 글 RLS 차단, 소프트 삭제 RPC |
+| 1 | `20261103013430_community_base.sql` | Day55·18 | 테이블, 트리거, RLS, `profile-image`·`place-image` 버킷 |
+| 2 | `20261103020722_upload_chunk_bucket.sql` | 19 | 10MB를 BFF로 받기 위한 비공개 청크 버킷 |
+| 3 | `20261103020855_save_place.sql` | 20 | 글과 이미지 경로를 한 트랜잭션으로 저장하는 RPC |
+| 4 | `20261103021238_place_soft_delete.sql` | 21 | `deleted_at`, 삭제 글 RLS 차단, 소프트 삭제 RPC |
 
 ## 환경변수
 

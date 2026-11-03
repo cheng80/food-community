@@ -48,11 +48,11 @@ export async function DELETE(request: Request, ctx: RouteContext<"/api/restauran
     checkOrigin(request);
     const { id } = await ctx.params;
     const session = await requireUser();
-    const place = await ownedPlace(session, id);
-    const { data, error } = await session.db.from("place").delete().eq("id", id).select("id");
+    await ownedPlace(session, id);
+    // 소프트 삭제이므로 이미지 행과 파일은 보존한다.
+    const { data, error } = await session.db.rpc("soft_delete_place", { p_id: id });
     if (error) throw new ApiError(502, "글을 삭제하지 못했어요.");
-    if (!data.length) throw notFound();
-    if (place.photoPaths.length) await session.db.storage.from("place-image").remove(place.photoPaths).catch(() => undefined);
+    if (!data) throw notFound();
     return { ok: true };
   });
 }

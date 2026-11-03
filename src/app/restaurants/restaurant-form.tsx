@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { errorMessage, useBack, useBusy, useFlashToast, useRequireLogin } from "@/components/app/hooks";
 import { NotFound, PageLoading } from "@/components/app/NotFound";
 import { Button } from "@/components/ui/Button";
@@ -36,6 +36,8 @@ let photoSeq = 0;
 export function RestaurantForm({ editId }: { editId?: string }) {
   const ready = useRequireLogin();
   const { restaurants, me } = useAppState();
+  // 다른 탭에서 지운 글은 수정 화면에 들어오지 못하게 서버 기준으로 맞춘다.
+  useEffect(() => { if (editId) void actions.loadRestaurant(editId).catch(() => undefined); }, [editId]);
   if (!ready) return <PageLoading />;
   if (!editId) return <Form />;
   const target = restaurants.find((r) => r.id === editId);

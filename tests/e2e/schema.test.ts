@@ -38,12 +38,14 @@ describe("Day55 스키마와 RLS (실제 Postgres + PostgREST)", () => {
     const [place] = await (await post("/place", bob.token, validPlace(bob.id))).json();
     const change = await rest(`/place?id=eq.${place.id}`, alice.token, { method: "PATCH", headers: { Prefer: "return=representation" }, body: JSON.stringify({ title: "탈취" }) });
     expect(await change.json()).toEqual([]);
-    const remove = await rest(`/place?id=eq.${place.id}`, alice.token, { method: "DELETE", headers: { Prefer: "return=representation" } });
-    expect(await remove.json()).toEqual([]);
+    // 21단계부터 직접 영구 삭제 권한이 없다
+    expect((await rest(`/place?id=eq.${place.id}`, alice.token, { method: "DELETE" })).status).toBe(403);
     expect((await post("/place_image", alice.token, { place_id: place.id, image_path: `${alice.id}/${uuid}.jpg`, position: 0 })).status).toBe(403);
     // 소유자 변경도 막힌다
     const steal = await rest(`/place?id=eq.${place.id}`, bob.token, { method: "PATCH", body: JSON.stringify({ user_id: alice.id }) });
     expect(steal.status).toBe(403);
+    // 본인은 내용 수정이 가능하다
+    expect((await rest(`/place?id=eq.${place.id}`, bob.token, { method: "PATCH", body: JSON.stringify({ title: "새이름" }) })).status).toBe(204);
   });
 
   it("NOT NULL과 길이 제약", async () => {

@@ -249,6 +249,7 @@ function gateway(pool) {
         if (url.pathname === "/__test/reset") { failures = []; log = []; return reply(res, 200, {}); }
         if (url.pathname === "/__test/log") return reply(res, 200, log);
         if (url.pathname === "/__test/objects") return reply(res, 200, (await pool.query("select bucket_id, name, size, mimetype from storage.objects order by created_at")).rows);
+        if (url.pathname === "/__test/query") return reply(res, 200, (await pool.query(input.sql, input.params)).rows);
         if (url.pathname === "/__test/token") {
           const user = await findUser(input.email, input.fullName);
           return reply(res, 200, { id: user.id, token: issue(user).access_token });

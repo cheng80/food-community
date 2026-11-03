@@ -26,4 +26,6 @@ VERIFY_TOOLS=... npm run test:stack
 VERIFY_TOOLS=... node tests/harness/run.mjs --serve  # 브라우저 확인, http://localhost:3100
 ```
 
+브라우저 확인은 `--serve`로 띄운 뒤 `http://localhost:3100`에서 한다. 구글 화면 없이 가짜 Auth가 바로 callback으로 돌려보낸다.
+
 포트 3100, 3101, 54397~54399를 쓴다. DB는 임시 폴더에 만들어 실행마다 초기화된다.

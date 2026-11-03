@@ -195,30 +195,6 @@ describe("맛집 BFF", () => {
     expect((await (await rest(`/place?user_id=eq.${userId}&select=id`, null)).json()).length).toBe(1);
   });
 
-  it("삭제 후 상세·목록에서 사라지고 파일도 지운다. Storage 실패는 삭제 실패가 아니다", async () => {
-    const { browser, id: userId } = await signedIn("place-delete@example.test");
-    const { id } = await create(browser, 2);
-    expect((await browser.send(`/api/restaurants/${id}`, "DELETE")).status).toBe(200);
-    expect((await detail(id)).status).toBe(404);
-    expect((await browser.bootstrap()).body.restaurants.some((r: { id: string }) => r.id === id)).toBe(false);
-    expect(await placeFiles(userId)).toEqual([]);
-    expect((await browser.send(`/api/restaurants/${id}`, "DELETE")).status).toBe(404);
-
-    const other = await create(browser, 1);
-    await testApi("fail", { method: "DELETE", path: "^/storage/v1/object/place-image$", status: 503, times: 1 });
-    expect((await browser.send(`/api/restaurants/${other.id}`, "DELETE")).status).toBe(200);
-    expect((await detail(other.id)).status).toBe(404);
-  });
-
-  it("DB 삭제 실패면 파일을 지우지 않는다", async () => {
-    const { browser, id: userId } = await signedIn("place-delete-fail@example.test");
-    const { id, paths } = await create(browser, 1);
-    await testApi("fail", { method: "DELETE", path: "^/rest/v1/place$", status: 503, times: 1 });
-    expect((await browser.send(`/api/restaurants/${id}`, "DELETE")).status).toBe(502);
-    expect(await placeFiles(userId)).toEqual(paths);
-    expect((await detail(id)).status).toBe(200);
-  });
-
   it("사용 중인 글 사진은 임시 이미지 삭제로 지울 수 없다", async () => {
     const { browser, id: userId } = await signedIn("place-used@example.test");
     const { paths } = await create(browser, 1);

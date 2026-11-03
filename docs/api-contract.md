@@ -29,11 +29,12 @@
 | GET | `/api/restaurants/{id}` | | `Restaurant`. 없으면 404 |
 | POST | `/api/restaurants` | `{ name, content, address, imagePaths }` | 201 `{ id }` |
 | PATCH | `/api/restaurants/{id}` | 같음 | `{ id }`. 타인 글 403 |
-| DELETE | `/api/restaurants/{id}` | | `{ ok }`. 타인 글 403 |
+| DELETE | `/api/restaurants/{id}` | | `{ ok }`. 소프트 삭제. 타인 글 403 |
 
 - `name` 1~40자, `content` 10~10000자, `address` 1~300자, `imagePaths`는 본인 폴더의 실제 파일 1~5개다. 작성자는 세션 사용자이며 본문의 값은 무시한다.
 - 글과 이미지 경로는 `save_place` RPC 한 트랜잭션으로 저장한다. 실패하면 전체가 롤백되고 기존 파일은 지우지 않는다. 커밋 후 교체된 파일만 지운다.
 - 다른 글이 쓰는 경로는 409다.
+- 삭제하면 `deleted_at`을 기록한다. 이후 목록, 상세, 마이 페이지, 수정, 재삭제는 없는 글로 처리한다(404). Data API 직접 조회도 RLS로 막힌다. 이미지 행과 파일은 보존하므로, 공개 URL을 아는 사람은 파일 자체를 계속 받을 수 있다.
 
 ## 이미지 업로드
 
