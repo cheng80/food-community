@@ -1,8 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
-import { useBack } from "@/components/app/hooks";
+import { useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
+import { errorMessage, useBack, useBusy, useFlashToast } from "@/components/app/hooks";
 import { Badge } from "@/components/ui/Feedback";
 import { GoogleLoginButton } from "@/components/ui/GoogleLoginButton";
 import { IconButton } from "@/components/ui/IconButton";
@@ -23,9 +24,20 @@ function Tile({ src, label, className = "flex" }: { src: string; label: string; 
 }
 
 export function LoginView() {
-  const router = useRouter();
   const back = useBack();
-  const next = safeNext(useSearchParams().get("next"));
+  const params = useSearchParams();
+  const next = safeNext(params.get("next"));
+  const [redirecting, setRedirecting] = useState(false);
+  const { busy, run } = useBusy();
+  const { show, toast } = useFlashToast();
+  const oauthError = params.has("error");
+
+  // 구글 화면에서 뒤로 왔을 때 bfcache로 복원돼도 버튼을 다시 쓸 수 있게
+  useEffect(() => {
+    const reset = () => setRedirecting(false);
+    window.addEventListener("pageshow", reset);
+    return () => window.removeEventListener("pageshow", reset);
+  }, []);
 
   return (
     <div className="flex min-h-dvh flex-col bg-background-default">
@@ -56,11 +68,13 @@ export function LoginView() {
                 구글 계정으로 3초 만에 시작해요
               </p>
               <GoogleLoginButton
-                onClick={() => {
-                  actions.login();
-                  router.replace(next);
-                }}
+                disabled={busy || redirecting}
+                onClick={() => run(async () => {
+                  try { await actions.login(next); setRedirecting(true); }
+                  catch (error) { show({ variant: "error", message: errorMessage(error, "로그인에 실패했어요.") }); }
+                })}
               />
+              {oauthError && <p role="alert" className="body-md text-text-on-image">로그인을 완료하지 못했어요. 다시 시도해 주세요.</p>}
               <Link href="/" className="label-lg text-text-on-image">
                 로그인 없이 둘러보기
               </Link>
@@ -69,6 +83,7 @@ export function LoginView() {
           </main>
         </div>
       </div>
+      {toast}
     </div>
   );
 }

@@ -68,7 +68,10 @@ export function FileUploader({
           disabled={disabled}
           aria-label={label}
           className="sr-only"
-          onChange={(e) => emit(e.target.files)}
+          onChange={(e) => {
+            emit(e.target.files);
+            e.target.value = ""; // 실패한 같은 파일을 다시 고를 수 있게
+          }}
         />
       </div>
       {errorText && <span className="label-md text-text-error">{errorText}</span>}

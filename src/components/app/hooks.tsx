@@ -19,14 +19,31 @@ export function useRequireLogin() {
   return hydrated && loggedIn;
 }
 
+export const errorMessage = (error: unknown, fallback: string) => (error instanceof Error ? error.message : fallback);
+
+/** 비동기 작업 진행 표시와 중복 실행 방지 — 같은 틱의 연속 클릭도 막도록 ref로 잠금 */
+export function useBusy() {
+  const lock = useRef(false);
+  const [busy, setBusy] = useState(false);
+  const run = useCallback(async (task: () => Promise<void>) => {
+    if (lock.current) return;
+    lock.current = true;
+    setBusy(true);
+    try { await task(); }
+    finally { lock.current = false; setBusy(false); }
+  }, []);
+  return { busy, run };
+}
+
 /** 로그아웃 후 홈으로 — 보호 페이지의 로그인 리다이렉트와 겹치지 않게 */
 export function useLogout() {
   const router = useRouter();
-  return useCallback(() => {
+  return useCallback(async () => {
+    if (loggingOut) return;
     loggingOut = true;
-    actions.logout();
-    router.replace("/");
-    setTimeout(() => (loggingOut = false), 1000);
+    try { await actions.logout(); router.replace("/"); }
+    catch (error) { window.alert(errorMessage(error, "로그아웃에 실패했어요.")); }
+    finally { setTimeout(() => (loggingOut = false), 1000); }
   }, [router]);
 }
 

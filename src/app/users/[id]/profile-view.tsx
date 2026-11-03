@@ -8,7 +8,6 @@ import { RestaurantGrid } from "@/components/app/RestaurantCard";
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Feedback";
 import { TopNavigation } from "@/components/ui/Navigation";
-import { ME_ID } from "@/lib/data";
 import { findUser, useAppState } from "@/lib/store";
 
 export function ProfileView({ id }: { id: string }) {
@@ -21,7 +20,7 @@ export function ProfileView({ id }: { id: string }) {
   if (!user) return <NotFound title="없는 사용자예요" description="탈퇴했거나 주소가 잘못되었어요" />;
 
   const posts = state.restaurants.filter((r) => r.authorId === id).sort((a, b) => b.createdAt - a.createdAt);
-  const isMe = state.loggedIn && id === ME_ID;
+  const isMe = state.loggedIn && id === state.me.id;
 
   return (
     <>

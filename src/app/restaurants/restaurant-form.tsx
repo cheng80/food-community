@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { useBack, useRequireLogin } from "@/components/app/hooks";
+import { errorMessage, useBack, useBusy, useFlashToast, useRequireLogin } from "@/components/app/hooks";
 import { NotFound, PageLoading } from "@/components/app/NotFound";
 import { Button } from "@/components/ui/Button";
 import { Toast } from "@/components/ui/Feedback";
@@ -15,7 +15,7 @@ import { Select } from "@/components/ui/Select";
 import { SelectItem } from "@/components/ui/SelectItem";
 import { Textarea } from "@/components/ui/Textarea";
 import { TextField } from "@/components/ui/TextField";
-import { addressBook, ME_ID } from "@/lib/data";
+import { addressBook } from "@/lib/data";
 import { actions, useAppState } from "@/lib/store";
 
 const MAX_PHOTOS = 5;
@@ -34,17 +34,19 @@ let photoSeq = 0;
 
 export function RestaurantForm({ editId }: { editId?: string }) {
   const ready = useRequireLogin();
-  const { restaurants } = useAppState();
+  const { restaurants, me } = useAppState();
   if (!ready) return <PageLoading />;
   if (!editId) return <Form />;
   const target = restaurants.find((r) => r.id === editId);
-  if (!target || target.authorId !== ME_ID) return <NotFound title="수정할 수 없는 글이에요" description="삭제되었거나 내가 쓴 글이 아니에요" />;
+  if (!target || target.authorId !== me.id) return <NotFound title="수정할 수 없는 글이에요" description="삭제되었거나 내가 쓴 글이 아니에요" />;
   return <Form editId={editId} initial={target} />;
 }
 
 function Form({ editId, initial }: { editId?: string; initial?: { name: string; content: string; address: string; photos: string[] } }) {
   const router = useRouter();
   const back = useBack();
+  const { show: flash, toast } = useFlashToast();
+  const { busy, run } = useBusy();
   const [photos, setPhotos] = useState<Photo[]>(
     () => initial?.photos.map((url, i) => ({ key: `p${photoSeq++}`, name: `사진 ${i + 1}`, url, status: "complete" as const })) ?? [],
   );
@@ -93,18 +95,25 @@ function Form({ editId, initial }: { editId?: string; initial?: { name: string; 
       return;
     }
     const input = { name: name.trim(), content: content.trim(), address, photos: ready.map((p) => p.url!) };
-    if (editId) {
-      actions.updateRestaurant(editId, input);
-      router.replace(`/restaurants/${editId}`);
-    } else {
-      router.replace(`/restaurants/${actions.createRestaurant(input)}`);
-      // 이전 라우트는 숨김 상태로 보존되므로 다음 글쓰기를 위해 비움
-      setPhotos([]);
-      setName("");
-      setContent("");
-      setAddress("");
-      setSubmitted(false);
-    }
+    return run(async () => {
+      try {
+        if (editId) {
+          await actions.updateRestaurant(editId, input);
+          router.replace(`/restaurants/${editId}`);
+        } else {
+          const id = await actions.createRestaurant(input);
+          router.replace(`/restaurants/${id}`);
+          // 이전 라우트는 숨김 상태로 보존되므로 다음 글쓰기를 위해 비움
+          setPhotos([]);
+          setName("");
+          setContent("");
+          setAddress("");
+          setSubmitted(false);
+        }
+      } catch (error) {
+        flash({ variant: "error", message: errorMessage(error, "글을 저장하지 못했어요.") });
+      }
+    });
   };
 
   const sheetResults = addressBook.filter((a) => a.includes(sheetQuery.trim()));
@@ -140,7 +149,7 @@ function Form({ editId, initial }: { editId?: string; initial?: { name: string; 
           noValidate
           onSubmit={(e) => {
             e.preventDefault();
-            submit();
+            void submit();
           }}
           className="grid grid-cols-1 gap-(--spacing-24) px-(--spacing-20) pt-(--spacing-24) pb-(--spacing-32) md:grid-cols-2 md:gap-x-(--spacing-32)"
         >
@@ -208,7 +217,7 @@ function Form({ editId, initial }: { editId?: string; initial?: { name: string; 
 
       <div className="sticky bottom-0 z-20 border-t border-border-default bg-background-default">
         <div className="mx-auto flex w-full max-w-page justify-end px-(--spacing-20) pt-(--spacing-12) pb-(--spacing-24)">
-          <Button type="submit" form="restaurant-form" size="lg" icon={editId ? "check" : "plus"} className="w-full md:w-60">
+          <Button type="submit" form="restaurant-form" size="lg" icon={editId ? "check" : "plus"} loading={busy} className="w-full md:w-60">
             {editId ? "수정하기" : "등록하기"}
           </Button>
         </div>
@@ -244,6 +253,7 @@ function Form({ editId, initial }: { editId?: string; initial?: { name: string; 
           </div>
         </div>
       </BottomSheet>
+      {toast}
     </>
   );
 }

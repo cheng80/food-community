@@ -56,6 +56,18 @@ export const ModalDefault: Story = {
   },
 };
 
+export const ModalBusy: Story = {
+  name: "Modal Busy",
+  render: () => <Modal open busy title="삭제할까요?" description="처리 중에는 닫거나 다시 누를 수 없어요." confirmLabel="삭제" onConfirm={onConfirm} onClose={onConfirm} />,
+  play: async ({ userEvent }) => {
+    onConfirm.mockClear();
+    await expect(screen.getByRole("button", { name: "삭제" })).toBeDisabled();
+    await expect(screen.getByRole("button", { name: "취소" })).toBeDisabled();
+    await userEvent.keyboard("{Escape}");
+    await expect(onConfirm).not.toHaveBeenCalled();
+  },
+};
+
 export const BottomSheetDefault: Story = {
   name: "Bottom Sheet",
   render: () => <BottomSheetDemo />,

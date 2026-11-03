@@ -19,6 +19,8 @@ export interface ModalProps {
   confirmLabel?: string;
   cancelLabel?: string;
   actionIcon?: IconName;
+  /** 확인 작업 진행 중 — 닫기와 중복 확인을 막음 */
+  busy?: boolean;
   onConfirm?: () => void;
   onClose?: () => void;
 }
@@ -30,14 +32,16 @@ export function Modal({
   confirmLabel = "확인",
   cancelLabel = "취소",
   actionIcon,
+  busy = false,
   onConfirm,
   onClose,
 }: ModalProps) {
   const titleId = useId();
-  useEscape(open, onClose);
+  const close = busy ? undefined : onClose;
+  useEscape(open, close);
   if (!open) return null;
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-background-overlay" onClick={onClose}>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-background-overlay" onClick={close}>
       <div
         role="dialog"
         aria-modal="true"
@@ -49,16 +53,16 @@ export function Modal({
           <h2 id={titleId} className="heading-sm text-text-default">
             {title}
           </h2>
-          <button type="button" aria-label="닫기" onClick={onClose} className="flex size-11 cursor-pointer items-center justify-center">
+          <button type="button" aria-label="닫기" disabled={busy} onClick={close} className="flex size-11 cursor-pointer items-center justify-center">
             <Icon name="close" size={16} />
           </button>
         </div>
         <p className="body-md text-text-default">{description}</p>
         <div className="flex gap-2">
-          <Button variant="secondary" size="sm" icon={actionIcon} onClick={onClose} className="w-[120px]">
+          <Button variant="secondary" size="sm" icon={actionIcon} disabled={busy} onClick={close} className="w-[120px]">
             {cancelLabel}
           </Button>
-          <Button size="sm" icon={actionIcon} onClick={onConfirm} className="w-[120px]">
+          <Button size="sm" icon={actionIcon} loading={busy} onClick={onConfirm} className="w-[120px]">
             {confirmLabel}
           </Button>
         </div>

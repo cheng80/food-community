@@ -1,97 +1,44 @@
 "use client";
-
 import { useSyncExternalStore } from "react";
-import { ME_ID, SEED_NOW, seedRestaurants, users, type Restaurant, type User } from "./data";
-
-// ponytail: 외부 DB·OAuth 없이 시연하는 클라이언트 스토어(localStorage). 실서비스는 서버 API로 교체.
+import { SEED_NOW, type Restaurant, type User } from "./data";
+import { request, send } from "./api";
 export interface AppState {
   loggedIn: boolean;
   me: User;
+  users: User[];
   restaurants: Restaurant[];
+  loaded: boolean;
 }
-
 export type RestaurantInput = Pick<Restaurant, "name" | "address" | "content" | "photos">;
-
-const KEY = "hidden-restaurants:v1";
-const seed: AppState = { loggedIn: false, me: users[0], restaurants: seedRestaurants };
-
-let state: AppState | null = null;
+const initial: AppState = { loggedIn: false, me: { id: "", nickname: "방문자" }, users: [], restaurants: [], loaded: false };
+let state = initial;
+let refreshSeq = 0;
 const listeners = new Set<() => void>();
-
-function load(): AppState {
-  try {
-    const saved = localStorage.getItem(KEY);
-    if (saved) return { ...seed, ...(JSON.parse(saved) as AppState) };
-  } catch {}
-  return seed;
-}
-
-function set(next: AppState) {
-  state = next;
-  try {
-    localStorage.setItem(KEY, JSON.stringify(next));
-  } catch {
-    // 용량 초과(큰 사진) 시 현재 탭 메모리에만 유지
-  }
-  listeners.forEach((l) => l());
-}
-
-const subscribe = (l: () => void) => {
-  listeners.add(l);
-  return () => listeners.delete(l);
-};
-const getSnapshot = () => (state ??= load());
-const getServerSnapshot = () => seed;
-
-export function useAppState() {
-  return useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
-}
-
-const noop = () => () => {};
-/** localStorage 상태가 반영된 뒤(true)에만 로그인 여부로 분기 */
-export function useHydrated() {
-  return useSyncExternalStore(
-    noop,
-    () => true,
-    () => false,
-  );
-}
-
-const subscribeMinute = (l: () => void) => {
-  const t = setInterval(l, 60_000);
-  return () => clearInterval(t);
-};
-/** 상대 시간 표기 기준 시각. 프리렌더는 SEED_NOW 고정 */
-export function useNow() {
-  return useSyncExternalStore(
-    subscribeMinute,
-    () => Math.floor(Date.now() / 60_000) * 60_000,
-    () => SEED_NOW,
-  );
-}
-
-export function findUser(s: AppState, id: string): User | undefined {
-  return id === ME_ID ? s.me : users.find((u) => u.id === id);
-}
-
-const current = () => getSnapshot();
-
+function set(next: AppState) { state = next; listeners.forEach((listener) => listener()); }
+const subscribe = (listener: () => void) => { listeners.add(listener); return () => { listeners.delete(listener); }; };
+export function useAppState() { return useSyncExternalStore(subscribe, () => state, () => initial); }
+export function useHydrated() { return useAppState().loaded; }
+const subscribeMinute = (listener: () => void) => { const timer = setInterval(listener, 60_000); return () => clearInterval(timer); };
+export function useNow() { return useSyncExternalStore(subscribeMinute, () => Math.floor(Date.now() / 60_000) * 60_000, () => SEED_NOW); }
+export function findUser(s: AppState, id: string) { return s.me.id === id ? s.me : s.users.find((u) => u.id === id); }
+/** 이미 성공한 쓰기를 목록 갱신 실패 때문에 실패로 보이지 않게 함 */
+const refreshAfterWrite = () => actions.refresh().catch(() => undefined);
+/** 이 단계에 없는 쓰기 API는 성공처럼 보이지 않게 실패로 알림 */
+const notReady = <A extends unknown[], R = void>(feature: string): ((...args: A) => Promise<R>) => () => Promise.reject(new Error(`${feature} 기능은 아직 연결되지 않았어요.`));
 export const actions = {
-  login: () => set({ ...current(), loggedIn: true }),
-  logout: () => set({ ...current(), loggedIn: false }),
-  updateProfile: (me: Pick<User, "nickname" | "avatarUrl">) => set({ ...current(), me: { ...current().me, ...me } }),
-  createRestaurant(input: RestaurantInput) {
-    const id = `r-${Date.now().toString(36)}`;
-    const s = current();
-    set({ ...s, restaurants: [{ ...input, id, authorId: ME_ID, createdAt: Date.now() }, ...s.restaurants] });
-    return id;
+  async refresh() {
+    const seq = ++refreshSeq;
+    const next = await request<Omit<AppState, "loaded">>("/api/bootstrap");
+    if (seq === refreshSeq) set({ ...next, loaded: true });
   },
-  updateRestaurant(id: string, input: RestaurantInput) {
-    const s = current();
-    set({ ...s, restaurants: s.restaurants.map((r) => (r.id === id ? { ...r, ...input, summary: undefined } : r)) });
+  async login(next: string) { const result = await send<{ url: string }>("/api/auth/login", "POST", { next }); window.location.assign(result.url); },
+  async logout() {
+    await send("/api/auth/logout", "POST");
+    set({ ...state, loggedIn: false, me: initial.me });
+    await refreshAfterWrite();
   },
-  deleteRestaurant(id: string) {
-    const s = current();
-    set({ ...s, restaurants: s.restaurants.filter((r) => r.id !== id) });
-  },
+  updateProfile: notReady<[{ nickname: string }]>("프로필 저장"),
+  createRestaurant: notReady<[RestaurantInput], string>("맛집 등록"),
+  updateRestaurant: notReady<[string, RestaurantInput]>("맛집 수정"),
+  deleteRestaurant: notReady<[string]>("맛집 삭제"),
 };

@@ -26,8 +26,9 @@ export const shortAddress = (address: string) => address.split(" ").slice(0, 3).
 export function nicknameError(value: string) {
   const v = value.trim();
   if (!v) return "닉네임을 입력해 주세요.";
-  if (v.length < 2 || v.length > 12) return "닉네임은 2~12자로 입력해 주세요.";
+  const length = [...v].length; // DB char_length와 같은 코드포인트 기준
+  if (length < 2 || length > 12) return "닉네임은 2~12자로 입력해 주세요.";
 }
 
 /** 로그인 후 돌아갈 경로 — 같은 사이트 내부 경로만 허용 */
-export const safeNext = (next: string | null) => (next?.startsWith("/") && !next.startsWith("//") ? next : "/");
+export const safeNext = (next: string | null) => (next?.startsWith("/") && !/^\/[\\/]/.test(next) && !/[\u0000-\u0020\\]/.test(next) ? next : "/");

@@ -7,10 +7,14 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
+    "test": "vitest run --config vitest.node.config.ts --project unit",
+    "test:stack": "next build && node tests/harness/run.mjs",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build"
   },
   "dependencies": {
+    "@supabase/ssr": "0.12.7",
+    "@supabase/supabase-js": "2.118.0",
     "lucide-react": "^1.61.0",
     "next": "16.4.2",
     "react": "19.3.0",

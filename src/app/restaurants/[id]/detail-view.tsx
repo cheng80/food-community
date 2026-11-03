@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { useBack, useFlashToast } from "@/components/app/hooks";
+import { errorMessage, useBack, useBusy, useFlashToast } from "@/components/app/hooks";
 import { NotFound } from "@/components/app/NotFound";
 import { Avatar } from "@/components/ui/Avatar";
 import { Button } from "@/components/ui/Button";
@@ -13,7 +13,6 @@ import { Menu, MenuItem } from "@/components/ui/Menu";
 import { TopNavigation } from "@/components/ui/Navigation";
 import { Modal } from "@/components/ui/Overlay";
 import { PhotoActions, PhotoSlider } from "@/components/ui/PhotoSlider";
-import { ME_ID } from "@/lib/data";
 import { formatDate } from "@/lib/format";
 import { actions, findUser, useAppState } from "@/lib/store";
 
@@ -22,6 +21,7 @@ export function DetailView({ id }: { id: string }) {
   const back = useBack();
   const state = useAppState();
   const { show, toast } = useFlashToast();
+  const { busy, run } = useBusy();
   const [menuOpen, setMenuOpen] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const r = state.restaurants.find((x) => x.id === id);
@@ -29,7 +29,7 @@ export function DetailView({ id }: { id: string }) {
   if (!r) return <NotFound title="없는 글입니다" description="삭제되었거나 주소가 잘못된 글이에요" />;
 
   const author = findUser(state, r.authorId);
-  const isOwner = state.loggedIn && r.authorId === ME_ID;
+  const isOwner = state.loggedIn && r.authorId === state.me.id;
   const edit = () => router.push(`/restaurants/${r.id}/edit`);
   const copy = async (text: string, message: string) => {
     try {
@@ -114,10 +114,16 @@ export function DetailView({ id }: { id: string }) {
         confirmLabel="삭제"
         cancelLabel="취소"
         onClose={() => setConfirmDelete(false)}
-        onConfirm={() => {
-          actions.deleteRestaurant(r.id);
-          router.replace("/");
-        }}
+        busy={busy}
+        onConfirm={() => run(async () => {
+          try {
+            await actions.deleteRestaurant(r.id);
+            router.replace("/");
+          } catch (error) {
+            setConfirmDelete(false);
+            show({ variant: "error", message: errorMessage(error, "글을 삭제하지 못했어요.") });
+          }
+        })}
       />
       {toast}
     </main>
