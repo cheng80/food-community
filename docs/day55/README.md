@@ -59,7 +59,7 @@ erDiagram
 
 ## 검증 상태
 
-로컬 실제 Postgres와 PostgREST에 migration을 적용해 제약과 RLS를 확인했다(`tests/e2e/schema.test.ts`, `docs/verify.md`). Storage 정책은 실제 Postgres의 `storage.objects` 스텁에서 확인했고 Storage 서버는 가짜다. 실제 Supabase 프로젝트 적용과 익명 조회·쓰기 차단은 확인했다. Google OAuth 연결과 로그인 이후 쓰기는 **아직 검증하지 않았다**.
+로컬 실제 Postgres와 PostgREST에 migration을 적용해 제약과 RLS를 확인했다(`tests/e2e/schema.test.ts`, `docs/verify.md`). Storage 정책은 실제 Postgres의 `storage.objects` 스텁에서 확인했고 Storage 서버는 가짜다. 실제 Supabase 프로젝트 적용, 익명 조회·쓰기 차단, Google 로그인, 가입 트리거, 로그인 후 등록·수정·소프트 삭제와 실제 Storage 업로드까지 localhost 앱에서 확인했다. 프로필 사진 업로드와 Vercel 환경은 **아직 검증하지 않았다**.
 
 ## 정정 이력
 
