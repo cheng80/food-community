@@ -1,0 +1,16 @@
+{
+  "generator": "Built-in image_gen via imagegen skill",
+  "purpose": "AI-generated fictional food photographs for food-community demo and upload verification",
+  "assets": [
+    {
+      "filename": "kalguksu-v1.png",
+      "workspace_path": "33-food-deploy-pwa/public/images/generated/kalguksu-v1.png",
+      "prompt": "Use case: photorealistic-natural. Asset type: food-community demo photograph and upload validation asset. Primary request: an appetizing Korean hand-cut noodle soup (kalguksu), one ceramic bowl on a small neighborhood restaurant's warm wooden table. Pale handmade noodles, clear clam broth, zucchini slices and scallions, gentle steam, a small dish of kimchi slightly out of focus. Natural window light, believable food textures, candid editorial food photography, 45-degree close view, landscape 4:3 composition, main dish centered with safe crop margins. No people, no readable signs, no logos, no watermark, no overlaid text. This depicts a fictional meal for a clearly labeled AI-generated demo, not evidence about any real restaurant."
+    },
+    {
+      "filename": "haemul-pajeon-v1.png",
+      "workspace_path": "33-food-deploy-pwa/public/images/generated/haemul-pajeon-v1.png",
+      "prompt": "Use case: photorealistic-natural. Asset type: food-community demo photograph and upload validation asset. Primary request: a freshly cooked Korean seafood and scallion pancake (haemul pajeon) on an off-white ceramic plate in a modest neighborhood restaurant. Crisp golden edges, green scallions, small pieces of shrimp and squid, dipping soy sauce in a little bowl; wooden tabletop, softly blurred simple Korean side dishes. Natural window light, realistic imperfect cooking texture, warm inviting editorial food photography, three-quarter overhead close view, landscape 4:3 composition with safe crop margins. No people, no readable signs, no brand marks, no watermark, no overlaid text. This depicts a fictional meal for a clearly labeled AI-generated demo, not evidence about any real restaurant."
+    }
+  ]
+}
