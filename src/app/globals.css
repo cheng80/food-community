@@ -1,0 +1,223 @@
+@import "tailwindcss";
+
+@font-face {
+  font-family: "Pretendard Variable";
+  src: url("../../fonts/PretendardVariable.woff2") format("woff2-variations");
+  font-weight: 45 920;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* design.pen variables — 색상은 @theme에 두어 bg-*, text-*, border-* 유틸리티로 사용 */
+@theme static {
+  --font-sans: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+
+  --font-google: var(--font-roboto), "Roboto", var(--font-sans);
+
+  --font-weight-medium: 500;
+  --font-weight-bold: 700;
+  --font-weight-semibold: 600;
+  --font-weight-regular: 400;
+
+  /* primitive */
+  --color-brand-50: #fff1ea;
+  --color-brand-100: #ffd6c5;
+  --color-brand-200: #ffbaa1;
+  --color-brand-300: #ff9d7c;
+  --color-brand-400: #ff7e54;
+  --color-brand-500: #ff5a1f;
+  --color-brand-600: #d54b1a;
+  --color-brand-700: #ac3c14;
+  --color-brand-800: #852e0f;
+  --color-brand-900: #602109;
+  --color-brand-950: #3d1405;
+
+  --color-neutral-50: #ffffff;
+  --color-neutral-100: #f5f5f5;
+  --color-neutral-200: #ececec;
+  --color-neutral-300: #c4c4c4;
+  --color-neutral-400: #9a9a9a;
+  --color-neutral-500: #7a7a7a;
+  --color-neutral-600: #5c5c5c;
+  --color-neutral-700: #474747;
+  --color-neutral-800: #333333;
+  --color-neutral-900: #1a1a1a;
+  --color-neutral-950: #0d0d0d;
+
+  --color-yellow-50: #fffbe5;
+  --color-yellow-100: #fef5b4;
+  --color-yellow-200: #feed7a;
+  --color-yellow-300: #fee500;
+  --color-yellow-400: #ffd43b;
+  --color-yellow-500: #d7a822;
+  --color-yellow-600: #b07d00;
+  --color-yellow-700: #916600;
+  --color-yellow-800: #725100;
+  --color-yellow-900: #553c00;
+  --color-yellow-950: #3a2800;
+
+  --color-red-50: #fff1f0;
+  --color-red-100: #ffd0cd;
+  --color-red-200: #ffaeab;
+  --color-red-300: #ff8a8a;
+  --color-red-400: #ff6b6b;
+  --color-red-500: #e5372d;
+  --color-red-600: #b4433a;
+  --color-red-700: #8f3932;
+  --color-red-800: #6c2f2b;
+  --color-red-900: #4a2522;
+  --color-red-950: #2a1a1a;
+
+  --color-alpha-black-0: #00000000;
+  --color-alpha-black-20: #00000033;
+  --color-alpha-black-25: #00000040;
+  --color-alpha-black-35: #00000059;
+  --color-alpha-white-40: #ffffff66;
+  --color-alpha-brand-33: #ff5a1f55;
+
+  /* semantic */
+  --color-text-default: var(--color-neutral-900);
+  --color-text-secondary: var(--color-neutral-600);
+  --color-text-tertiary: var(--color-neutral-600);
+  --color-text-placeholder: var(--color-neutral-600);
+  --color-text-content: var(--color-neutral-800);
+  --color-text-brand: var(--color-brand-500);
+  --color-text-on-brand: var(--color-neutral-50);
+  --color-text-inverse: var(--color-neutral-50);
+  --color-text-on-image: var(--color-neutral-50);
+  --color-text-error: var(--color-red-500);
+  --color-text-error-strong: var(--color-red-600);
+  --color-text-on-kakao: var(--color-neutral-900);
+  --color-text-disabled: var(--color-neutral-400);
+
+  --color-icon-default: var(--color-neutral-900);
+  --color-icon-secondary: var(--color-neutral-600);
+  --color-icon-tertiary: var(--color-neutral-400);
+  --color-icon-disabled: var(--color-neutral-300);
+  --color-icon-brand: var(--color-brand-500);
+  --color-icon-on-brand: var(--color-neutral-50);
+  --color-icon-on-image: var(--color-neutral-50);
+  --color-icon-error: var(--color-red-500);
+  --color-icon-on-kakao: var(--color-neutral-900);
+
+  --color-background-default: var(--color-neutral-50);
+  --color-background-subtle: var(--color-neutral-100);
+  --color-background-inverse: var(--color-neutral-900);
+  --color-background-brand: var(--color-brand-500);
+  --color-background-error-subtle: var(--color-red-50);
+  --color-background-kakao: var(--color-yellow-300);
+  --color-background-overlay: var(--color-alpha-black-25);
+  --color-background-overlay-strong: var(--color-alpha-black-35);
+  --color-background-success: var(--color-brand-600);
+  --color-background-warning: var(--color-yellow-700);
+  --color-background-info: var(--color-neutral-800);
+  --color-background-error: var(--color-red-500);
+  --color-background-disabled: var(--color-neutral-100);
+  --color-background-skeleton: var(--color-neutral-200);
+  --color-background-skeleton-strong: var(--color-neutral-300);
+
+  --color-border-default: var(--color-neutral-200);
+  --color-border-error: var(--color-red-500);
+  --color-border-surface: var(--color-neutral-50);
+  --color-border-on-image: var(--color-alpha-white-40);
+
+  --color-shadow-brand: var(--color-alpha-brand-33);
+  --color-shadow-default: var(--color-alpha-black-20);
+
+  /* Google 로그인 버튼 브랜드 가이드 색 */
+  --color-google-surface: var(--color-neutral-50);
+  --color-google-border: #747775;
+  --color-google-text: #1f1f1f;
+
+  /* layout — max-w-page */
+  --container-page: 1280px;
+}
+
+:root {
+  --font-size-900: 40px;
+  --font-size-800: 36px;
+  --font-size-700: 32px;
+  --font-size-600: 28px;
+  --font-size-500: 24px;
+  --font-size-400: 20px;
+  --font-size-300: 16px;
+  --font-size-200: 14px;
+  --font-size-100: 12px;
+  --font-line-height-tight: 1.2;
+  --font-line-height-normal: 1.4;
+
+  --spacing-8: 8px;
+  --spacing-12: 12px;
+  --spacing-16: 16px;
+  --spacing-20: 20px;
+  --spacing-24: 24px;
+  --spacing-32: 32px;
+}
+
+/* 텍스트 컴포넌트 (display-lg … label-md) */
+@utility display-lg {
+  font-size: var(--font-size-800);
+  font-weight: var(--font-weight-bold);
+  line-height: var(--font-line-height-tight);
+  letter-spacing: -0.02em;
+}
+@utility display-md {
+  font-size: var(--font-size-700);
+  font-weight: var(--font-weight-bold);
+  line-height: var(--font-line-height-tight);
+  letter-spacing: -0.02em;
+}
+@utility display-sm {
+  font-size: var(--font-size-600);
+  font-weight: var(--font-weight-bold);
+  line-height: var(--font-line-height-tight);
+  letter-spacing: -0.02em;
+}
+@utility heading-lg {
+  font-size: var(--font-size-500);
+  font-weight: var(--font-weight-bold);
+  line-height: var(--font-line-height-tight);
+  letter-spacing: -0.02em;
+}
+@utility heading-md {
+  font-size: var(--font-size-400);
+  font-weight: var(--font-weight-bold);
+  line-height: var(--font-line-height-tight);
+  letter-spacing: -0.02em;
+}
+@utility heading-sm {
+  font-size: var(--font-size-300);
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--font-line-height-tight);
+  letter-spacing: -0.02em;
+}
+@utility body-lg {
+  font-size: var(--font-size-300);
+  font-weight: var(--font-weight-regular);
+  line-height: var(--font-line-height-normal);
+  letter-spacing: -0.02em;
+}
+@utility body-md {
+  font-size: var(--font-size-200);
+  font-weight: var(--font-weight-regular);
+  line-height: var(--font-line-height-normal);
+  letter-spacing: -0.02em;
+}
+@utility label-lg {
+  font-size: var(--font-size-200);
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--font-line-height-normal);
+  letter-spacing: -0.02em;
+}
+@utility label-md {
+  font-size: var(--font-size-100);
+  font-weight: var(--font-weight-regular);
+  line-height: var(--font-line-height-normal);
+  letter-spacing: -0.02em;
+}
+
+body {
+  background: var(--color-background-default);
+  color: var(--color-text-default);
+  font-family: var(--font-sans);
+}
