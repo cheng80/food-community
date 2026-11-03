@@ -70,7 +70,7 @@ Day55~61의 독립 학습 폴더마다 브랜치 하나를 두었습니다. `mai
 
 ## Day별 제출과 검증
 
-제출 URL과 문안은 [docs/progress/submission/README.md](docs/progress/submission/README.md)에 있고, 실제 연동 요약은 [docs/progress/evidence/](docs/progress/evidence/)에 있습니다. 실행 로그 원본은 공개하지 않았습니다.
+제출 URL과 설명은 [docs/progress/submission/README.md](docs/progress/submission/README.md)에 있고, 실제 연동 요약은 [docs/progress/evidence/](docs/progress/evidence/)에 있습니다. 실행 로그 원본은 공개하지 않았습니다.
 
 | Day | 검증 범위 |
 | --- | --- |
