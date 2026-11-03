@@ -1,4 +1,4 @@
-# Day61 결제 디자인 (03-food-design-payment)
+# Day61 결제 디자인과 핸드오프 (04-food-handoff-payment)
 
 > 유료 강연·모임 결제 화면 디자인과 배너. 실제 결제·PG·환불 정책은 범위가 아니다. 화면의 가격·규정은 샘플이다.
 
@@ -29,7 +29,7 @@ pen.dev 앱 + Pencil MCP `execute`로 편집하고 앱의 File > Save로 저장�
 | 22 마이 · 프로필 설정 활성화 | 05 마이의 Profile Settings 재사용 | `renders/22-my-profile-settings.png` |
 | 23~25 데스크톱 1280 | 메인, 상세+시트, 마이 2:3 | `renders/23~25-*.png` |
 | UI / Payment | 새 컴포넌트 (아래) | `renders/ui-payment.png` |
-| UI / Program Banner | 정확 규격 배너 프레임 2개 | `banners/` |
+| UI / Program Banner | 정확 규격 배너 프레임 2개 | `public/images/program/banner-*.png` |
 
 ### 재사용과 새 컴포넌트
 
@@ -55,5 +55,63 @@ pen.dev 앱 + Pencil MCP `execute`로 편집하고 앱의 File > Save로 저장�
 | `banner-desktop-v1.png` | 2200×715 (약 3.077:1) | 2480×806 프레임의 이미지 fill |
 | `bento-v1.png`, `sushi-five-v1.png`, `sauce-pots-two-v1.png`, `paper-texture-v1.png` | 1254², 1672×941 | 상세 대표 이미지 합성(`program/hero/*`) |
 
-- 정확 규격 결과: `banners/banner-720x360.png`(720×360), `banners/banner-2480x806.png`(2480×806). Pencil `Export`로 내보냈고 `file`로 크기를 확인했다. 비율이 같아 왜곡이 없다.
+- 정확 규격 결과: `public/images/program/banner-720x360.png`(720×360), `public/images/program/banner-2480x806.png`(2480×806). 04에서 파일을 옮겨 앱이 그대로 쓴다. Pencil `Export`로 내보냈고 `file`로 크기를 확인했다. 비율이 같아 왜곡이 없다.
 - 카피 `심심한 주말 놓치지 아까운 기회`, CTA `요리 수업 알아보기`는 배너 이미지에 들어 있다. 코드에서는 링크 이름으로 같은 문구를 제공한다.
+
+## 웹 핸드오프 (04)
+
+03 HEAD `154628d` 트리를 복제했다. 03과 04는 각각 독립 로컬 repo이고 remote가 없다. `design.pen`은 03과 같다.
+
+### 실행
+
+```sh
+npm ci
+npm run build
+npx next start -p 3061
+```
+
+`.env` 없이 동작한다. 데이터는 `src/lib/sample-data.ts`, 결제 상태는 `src/lib/payment-sample.ts`의 브라우저 세션 저장소에 있다.
+
+### 8화면 주소 (http://localhost:3061)
+
+| 화면 | 주소 | 도달 경로 |
+| --- | --- | --- |
+| 메인 배너 | `/` | 첫 화면 |
+| 배너 상세 | `/programs/sushi-bento` | 배너 클릭 |
+| 상세 결제하기 시트 | `/programs/sushi-bento?sheet=payment` | `결제하기` |
+| 결제 완료 | `/programs/sushi-bento/complete` | 시트의 `샘플 결제 진행` |
+| 마이 결제 내역 탭 | `/me?tab=payments` | 완료 화면의 `결제 내역 보기` |
+| 마이 취소 내역 탭 | `/me?tab=cancels` | `샘플 취소` 확인, 또는 탭 |
+| 마이 내가 쓴 글 탭 | `/me?tab=posts` | 탭 |
+| 프로필 설정 활성화 | `/me?tab=posts&profile=edit` | `프로필 설정` |
+
+정원 마감 예시는 `/programs/drive-meetup`이다.
+
+### 샘플 경계
+
+- 결제·취소·환불은 일어나지 않는다. 시트, 완료, 내역에 샘플 안내를 표시하고 버튼과 상태 문구에 `샘플`을 넣었다.
+- 가격, 취소 규정, 금전 관계 표기는 예시다. PRD의 PG·환불 열린 질문을 결정한 것이 아니다.
+- `src/app/api`와 `src/lib/server`는 33과 바이트가 같다. 브라우저 store(`src/lib/store.ts`)만 샘플 데이터로 바꿔 이 라우트를 호출하지 않는다. 그래서 글 등록·수정은 저장되지 않고 `샘플에서는 글을 저장하지 않아요.`를 보여 준다.
+- 33 앱, Production, DB, 실제 사용자 글은 건드리지 않았다.
+
+### 검증 (2026-11-03, 프로덕션 빌드, 포트 3061, Ego 브라우저)
+
+| 항목 | 결과 |
+| --- | --- |
+| `tsc --noEmit`, `eslint src tests/unit`, `next build` | 통과 |
+| 단위 테스트 | 72개 통과. 샘플 결제 규칙 3개 추가, 없어진 BFF 호출을 시험하던 store 테스트 제거 |
+| Storybook | `Payment` 8개 통과, `Overlay` 2개 통과. `Modal Busy` 1개 실패 |
+| 모바일 360 전체 흐름 | 배너, 상세, 시트, Esc·닫기, 샘플 결제, 완료, 내역, 샘플 취소, 취소 탭, 글 탭, 프로필 저장 도달. 가로 넘침 0 |
+| 키보드 | 시트 열면 포커스 진입, Tab이 라디오·체크박스·닫기·결제 순서, Space로 동의, Enter로 제출, Esc 후 `결제하기`로 복귀 |
+| 반응형 | 320 1열, 768 2열, 1280·1440 4열. `max-w-page` 1280 유지. 768 이상 2480×806, 미만 720×360 배너 |
+| 기존 화면 | 맛집 상세, 사용자 프로필, 로그인, 글 등록 화면 표시. 로그아웃 후 `/me`는 `/login?next=/me` |
+| 외부 호출 | 전체 흐름에서 `/api/*` 요청 0건 |
+
+증거 화면은 `docs/day61/web/`, Pencil 렌더는 `docs/day61/renders/`에 있다.
+
+### 한계
+
+- `Modal Busy` 스토리 실패는 33의 `Overlay.tsx`로 되돌려도 같아 이번 변경 때문이 아니다. 로딩 스피너 라벨이 버튼 이름에 합쳐지는 기존 문제이며 범위 밖이라 고치지 않았다.
+- `next dev`에서는 브라우저 확장(`data-hwp-extension`)이 넣은 속성 때문에 hydration 오버레이가 뜰 수 있어 프로덕션 서버로 검증했다.
+- BFF를 부르는 `tests/e2e`, `npm run test:stack`은 지시에 따라 다시 돌리지 않았다.
+- 활성 탭 글자가 다른 탭보다 조금 아래에 있는 것은 기존 `TabNavigation`과 Pencil 컴포넌트의 형태를 따른 결과다.
