@@ -49,9 +49,29 @@ describe("store", () => {
     await expect(actions.login("/")).rejects.toThrow("구글 로그인 연결을 확인해 주세요.");
   });
 
-  it("이 단계에 없는 쓰기 기능은 성공처럼 보이지 않는다", async () => {
-    await expect(actions.createRestaurant({ name: "", address: "", content: "", photos: [] })).rejects.toThrow("아직 연결되지");
-    await expect(actions.updateRestaurant("x", { name: "", address: "", content: "", photos: [] })).rejects.toThrow("아직 연결되지");
-    await expect(actions.deleteRestaurant("x")).rejects.toThrow("아직 연결되지");
+  it("글 저장 성공 후 bootstrap 실패는 실패가 아니다: 재등록으로 중복 글이 생기지 않게 id를 돌려준다", async () => {
+    const input = { name: "맛집", address: "서울", content: "열 글자가 넘는 후기입니다", imagePaths: [] };
+    vi.stubGlobal("fetch", vi.fn(async (url: string) => (url === "/api/bootstrap" ? respond(500, {}) : respond(201, { id: "new-id" }))));
+    await expect(actions.createRestaurant(input)).resolves.toBe("new-id");
+    await expect(actions.updateRestaurant("new-id", input)).resolves.toBeUndefined();
+    await expect(actions.deleteRestaurant("new-id")).resolves.toBeUndefined();
+  });
+
+  it("쓰기 실패는 호출자에게 전달한다", async () => {
+    const input = { name: "맛집", address: "서울", content: "열 글자가 넘는 후기입니다", imagePaths: [] };
+    vi.stubGlobal("fetch", vi.fn(async () => respond(403, { error: "내가 쓴 글만 바꿀 수 있어요." })));
+    await expect(actions.createRestaurant(input)).rejects.toThrow("내가 쓴 글만");
+    await expect(actions.updateRestaurant("x", input)).rejects.toThrow("내가 쓴 글만");
+    await expect(actions.deleteRestaurant("x")).rejects.toThrow("내가 쓴 글만");
+  });
+
+  it("상세 조회가 404면 store에서 글을 빼고, 일시 오류면 오류를 전달한다", async () => {
+    const restaurant = { id: "a", name: "맛집", address: "서울", content: "후기", photos: [], photoPaths: [], authorId: "u", createdAt: 1 };
+    vi.stubGlobal("fetch", vi.fn(async () => respond(200, restaurant)));
+    await actions.loadRestaurant("a");
+    vi.stubGlobal("fetch", vi.fn(async () => respond(502, { error: "x" })));
+    await expect(actions.loadRestaurant("a")).rejects.toThrow("x");
+    vi.stubGlobal("fetch", vi.fn(async () => respond(404, { error: "없는 글입니다." })));
+    await expect(actions.loadRestaurant("a")).resolves.toBeUndefined();
   });
 });

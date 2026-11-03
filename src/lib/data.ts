@@ -12,6 +12,8 @@ export interface Restaurant {
   /** 목록 카드 한 줄 소개 (없으면 content) */
   summary?: string;
   photos: string[];
+  /** Storage 경로. 수정 저장 때 서버로 보낸다. */
+  photoPaths: string[];
   authorId: string;
   /** epoch ms */
   createdAt: number;

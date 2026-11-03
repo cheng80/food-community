@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { detectImageType, imageError, isUuid, maxChunks, MAX_BYTES, ownsImage } from "@/lib/validation";
+import { detectImageType, imageError, isUuid, maxChunks, MAX_BYTES, ownsImage, restaurantErrors } from "@/lib/validation";
 
 const user = "11111111-1111-4111-8111-111111111111";
 const file = "22222222-2222-4222-8222-222222222222";
@@ -31,5 +31,19 @@ describe("image validation", () => {
     }
     expect(isUuid(file)).toBe(true);
     expect(isUuid("../..")).toBe(false);
+  });
+});
+
+describe("restaurantErrors", () => {
+  const valid = { name: "맛집", content: "가".repeat(10), address: "서울 구로구" };
+  const count = (input: Record<string, unknown>) => Object.values(restaurantErrors(input)).filter(Boolean).length;
+  it("경계값", () => {
+    expect(count(valid)).toBe(0);
+    expect(count({ ...valid, name: "가".repeat(40) })).toBe(0);
+    expect(count({ ...valid, name: "가".repeat(41) })).toBe(1);
+    expect(count({ ...valid, content: "가".repeat(9) })).toBe(1);
+    expect(count({ ...valid, content: `  ${"가".repeat(9)}  ` })).toBe(1);
+    expect(count({ name: "   ", content: "", address: " " })).toBe(3);
+    expect(count({ name: 1, content: null, address: undefined })).toBe(3);
   });
 });

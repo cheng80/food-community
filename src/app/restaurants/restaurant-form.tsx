@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { errorMessage, useBack, useBusy, useFlashToast, useRequireLogin } from "@/components/app/hooks";
 import { NotFound, PageLoading } from "@/components/app/NotFound";
 import { Button } from "@/components/ui/Button";
@@ -16,17 +16,18 @@ import { SelectItem } from "@/components/ui/SelectItem";
 import { Textarea } from "@/components/ui/Textarea";
 import { TextField } from "@/components/ui/TextField";
 import { addressBook } from "@/lib/data";
-import { actions, useAppState } from "@/lib/store";
-
-const MAX_PHOTOS = 5;
-const MAX_BYTES = 10 * 1024 * 1024;
-const ACCEPT = ["image/jpeg", "image/png", "image/webp"];
-const MIN_CONTENT = 10;
+import { actions, useAppState, type RestaurantInput } from "@/lib/store";
+import { commitDrafts, discardImage, uploadImage } from "@/lib/upload";
+import { IMAGE_TYPES, MAX_BYTES, MAX_PHOTOS, MAX_TITLE, MIN_CONTENT, restaurantErrors } from "@/lib/validation";
 
 interface Photo {
   key: string;
   name: string;
   url?: string;
+  /** Storage 경로. 업로드가 끝나면 채워진다. */
+  path?: string;
+  /** 이번 작성 중 올린 이미지인지. 기존 이미지는 저장 후 서버가 지운다. */
+  draft: boolean;
   status: "uploading" | "complete" | "error";
 }
 
@@ -42,14 +43,16 @@ export function RestaurantForm({ editId }: { editId?: string }) {
   return <Form editId={editId} initial={target} />;
 }
 
-function Form({ editId, initial }: { editId?: string; initial?: { name: string; content: string; address: string; photos: string[] } }) {
+function Form({ editId, initial }: { editId?: string; initial?: { name: string; content: string; address: string; photos: string[]; photoPaths: string[] } }) {
   const router = useRouter();
   const back = useBack();
   const { show: flash, toast } = useFlashToast();
   const { busy, run } = useBusy();
   const [photos, setPhotos] = useState<Photo[]>(
-    () => initial?.photos.map((url, i) => ({ key: `p${photoSeq++}`, name: `사진 ${i + 1}`, url, status: "complete" as const })) ?? [],
+    () => initial?.photos.map((url, i) => ({ key: `p${photoSeq++}`, name: `사진 ${i + 1}`, url, path: initial.photoPaths[i], draft: false, status: "complete" as const })) ?? [],
   );
+  // 업로드가 끝나기 전에 사용자가 지운 사진을 알아내기 위한 현재 키 목록
+  const liveKeys = useRef(new Set(photos.map((p) => p.key)));
   const [photoError, setPhotoError] = useState<string>();
   const [name, setName] = useState(initial?.name ?? "");
   const [content, setContent] = useState(initial?.content ?? "");
@@ -61,11 +64,10 @@ function Form({ editId, initial }: { editId?: string; initial?: { name: string; 
   const [sheetQuery, setSheetQuery] = useState("");
 
   const ready = photos.filter((p) => p.status === "complete");
+  const uploading = photos.some((p) => p.status === "uploading");
   const errors = {
     photos: ready.length === 0 ? "사진을 1장 이상 올려 주세요." : undefined,
-    name: name.trim() ? undefined : "맛집 이름을 입력해 주세요.",
-    content: content.trim().length < MIN_CONTENT ? `내용을 ${MIN_CONTENT}자 이상 적어 주세요.` : undefined,
-    address: address ? undefined : "주소 검색으로 정확한 주소를 골라 주세요.",
+    ...restaurantErrors({ name, content, address }),
   };
   const errorCount = Object.values(errors).filter(Boolean).length;
   const show = (key: keyof typeof errors) => (submitted ? errors[key] : undefined);
@@ -73,18 +75,37 @@ function Form({ editId, initial }: { editId?: string; initial?: { name: string; 
   const addFiles = (files: File[]) => {
     setPhotoError(undefined);
     const room = MAX_PHOTOS - photos.length;
-    const valid = files.filter((f) => ACCEPT.includes(f.type) && f.size <= MAX_BYTES);
+    const valid = files.filter((f) => IMAGE_TYPES.includes(f.type) && f.size <= MAX_BYTES["place-image"]);
     if (valid.length < files.length) setPhotoError("jpg, png, webp 이미지만 장당 10MB 이하로 올릴 수 있어요.");
     else if (valid.length > room) setPhotoError(`사진은 최대 ${MAX_PHOTOS}장까지 올릴 수 있어요.`);
     for (const file of valid.slice(0, room)) {
       const key = `p${photoSeq++}`;
-      setPhotos((list) => [...list, { key, name: file.name, status: "uploading" }]);
-      const reader = new FileReader();
+      liveKeys.current.add(key);
+      setPhotos((list) => [...list, { key, name: file.name, draft: true, status: "uploading" }]);
       const update = (patch: Partial<Photo>) => setPhotos((list) => list.map((p) => (p.key === key ? { ...p, ...patch } : p)));
-      reader.onload = () => update({ url: String(reader.result), status: "complete" });
-      reader.onerror = () => update({ status: "error" });
-      reader.readAsDataURL(file);
+      uploadImage(file, "place-image").then(
+        ({ path, url }) => {
+          if (liveKeys.current.has(key)) update({ path, url, status: "complete" });
+          else discardImage("place-image", path);
+        },
+        (error) => {
+          update({ status: "error" });
+          setPhotoError(errorMessage(error, "사진을 올리지 못했어요."));
+        },
+      );
     }
+  };
+
+  const removePhoto = (photo: Photo) => {
+    liveKeys.current.delete(photo.key);
+    setPhotos((list) => list.filter((p) => p.key !== photo.key));
+    if (photo.draft && photo.path) discardImage("place-image", photo.path);
+  };
+
+  /** 작성 취소: 저장하지 않은 이미지는 지우고 돌아간다. */
+  const cancel = () => {
+    photos.filter((p) => p.draft).forEach(removePhoto);
+    back();
   };
 
   const submit = () => {
@@ -94,14 +115,24 @@ function Form({ editId, initial }: { editId?: string; initial?: { name: string; 
       window.scrollTo({ top: 0, behavior: "smooth" });
       return;
     }
-    const input = { name: name.trim(), content: content.trim(), address, photos: ready.map((p) => p.url!) };
+    if (uploading) {
+      setPhotoError("사진 업로드가 끝나면 저장할 수 있어요.");
+      return;
+    }
+    const imagePaths = ready.map((p) => p.path!);
+    const input: RestaurantInput = { name: name.trim(), content: content.trim(), address, imagePaths };
     return run(async () => {
       try {
         if (editId) {
           await actions.updateRestaurant(editId, input);
+          commitDrafts(imagePaths);
+          // 숨겨진 폼으로 돌아와도 다시 저장된 이미지를 임시본으로 보지 않게 한다.
+          setPhotos((list) => list.map((p) => ({ ...p, draft: false })));
           router.replace(`/restaurants/${editId}`);
         } else {
           const id = await actions.createRestaurant(input);
+          commitDrafts(imagePaths);
+          liveKeys.current.clear();
           router.replace(`/restaurants/${id}`);
           // 이전 라우트는 숨김 상태로 보존되므로 다음 글쓰기를 위해 비움
           setPhotos([]);
@@ -125,7 +156,7 @@ function Form({ editId, initial }: { editId?: string; initial?: { name: string; 
         {menuOpen && (
           <div className="absolute inset-x-0 top-full z-20 mx-auto flex max-w-page justify-end px-(--spacing-16)">
             <Menu>
-              <MenuItem size="sm" icon="close" variant="destructive" onClick={back}>
+              <MenuItem size="sm" icon="close" variant="destructive" onClick={cancel}>
                 작성 취소
               </MenuItem>
             </Menu>
@@ -158,7 +189,7 @@ function Form({ editId, initial }: { editId?: string; initial?: { name: string; 
               label={`사진 * ${photos.length} / ${MAX_PHOTOS}`}
               helperText="최대 5장 · 장당 10MB 이하 · jpg, png, webp"
               dropzoneText="사진 추가"
-              accept={ACCEPT.join(",")}
+              accept={IMAGE_TYPES.join(",")}
               disabled={photos.length >= MAX_PHOTOS}
               errorText={photoError ?? show("photos")}
               onFiles={addFiles}
@@ -171,7 +202,7 @@ function Form({ editId, initial }: { editId?: string; initial?: { name: string; 
                       name={p.name}
                       status={p.status}
                       thumbnailUrl={p.url}
-                      onRemove={() => setPhotos((list) => list.filter((x) => x.key !== p.key))}
+                      onRemove={() => removePhoto(p)}
                     />
                   ))}
                 </div>
@@ -183,7 +214,7 @@ function Form({ editId, initial }: { editId?: string; initial?: { name: string; 
               label="맛집 이름 *"
               placeholder="식당 이름을 입력하세요"
               value={name}
-              maxLength={40}
+              maxLength={MAX_TITLE}
               errorText={show("name")}
               onChange={(e) => setName(e.target.value)}
             />
@@ -217,7 +248,7 @@ function Form({ editId, initial }: { editId?: string; initial?: { name: string; 
 
       <div className="sticky bottom-0 z-20 border-t border-border-default bg-background-default">
         <div className="mx-auto flex w-full max-w-page justify-end px-(--spacing-20) pt-(--spacing-12) pb-(--spacing-24)">
-          <Button type="submit" form="restaurant-form" size="lg" icon={editId ? "check" : "plus"} loading={busy} className="w-full md:w-60">
+          <Button type="submit" form="restaurant-form" size="lg" icon={editId ? "check" : "plus"} loading={busy} disabled={uploading} className="w-full md:w-60">
             {editId ? "수정하기" : "등록하기"}
           </Button>
         </div>

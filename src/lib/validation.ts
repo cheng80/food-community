@@ -29,3 +29,20 @@ export function detectImageType(bytes: Uint8Array) {
   if (bytes.slice(0, 8).join() === "137,80,78,71,13,10,26,10") return "image/png";
   if (ascii(0, 4) === "RIFF" && ascii(8, 12) === "WEBP") return "image/webp";
 }
+
+export const MAX_PHOTOS = 5;
+export const MAX_TITLE = 40;
+export const MIN_CONTENT = 10;
+const chars = (value: string) => [...value.trim()].length; // DB char_length와 같은 코드포인트 기준
+
+/** 맛집 입력 검증. 폼과 서버가 같은 규칙을 쓴다. */
+export function restaurantErrors(input: Record<string, unknown>) {
+  const name = typeof input.name === "string" ? chars(input.name) : 0;
+  const content = typeof input.content === "string" ? chars(input.content) : 0;
+  const address = typeof input.address === "string" ? chars(input.address) : 0;
+  return {
+    name: !name ? "맛집 이름을 입력해 주세요." : name > MAX_TITLE ? `맛집 이름은 ${MAX_TITLE}자 이하로 입력해 주세요.` : undefined,
+    content: content < MIN_CONTENT ? `내용을 ${MIN_CONTENT}자 이상 적어 주세요.` : content > 10000 ? "내용은 10000자 이하로 입력해 주세요." : undefined,
+    address: !address ? "주소 검색으로 정확한 주소를 골라 주세요." : address > 300 ? "주소가 너무 길어요." : undefined,
+  };
+}

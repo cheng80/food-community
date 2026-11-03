@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { errorMessage, useBack, useBusy, useFlashToast } from "@/components/app/hooks";
 import { NotFound } from "@/components/app/NotFound";
 import { Avatar } from "@/components/ui/Avatar";
@@ -25,6 +25,9 @@ export function DetailView({ id }: { id: string }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const r = state.restaurants.find((x) => x.id === id);
+
+  // 다른 기기·탭에서 지워졌거나 목록에 없는 글도 서버 기준으로 맞춘다. 네트워크 오류면 이미 가진 내용을 유지한다.
+  useEffect(() => { void actions.loadRestaurant(id).catch(() => undefined); }, [id]);
 
   if (!r) return <NotFound title="없는 글입니다" description="삭제되었거나 주소가 잘못된 글이에요" />;
 

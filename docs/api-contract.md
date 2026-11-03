@@ -21,6 +21,20 @@
 
 `nickname`은 공백 제외 2~12자다. `imagePath`는 업로드 완료 응답의 `path`이며 본인 폴더에 실제로 있어야 한다. 저장에 성공한 뒤 이전 이미지 파일을 지운다.
 
+## 맛집
+
+| 메서드 | 경로 | 요청 | 응답 |
+| --- | --- | --- | --- |
+| GET | `/api/bootstrap` | | `restaurants`에 최신순 목록 (최대 1000개) |
+| GET | `/api/restaurants/{id}` | | `Restaurant`. 없으면 404 |
+| POST | `/api/restaurants` | `{ name, content, address, imagePaths }` | 201 `{ id }` |
+| PATCH | `/api/restaurants/{id}` | 같음 | `{ id }`. 타인 글 403 |
+| DELETE | `/api/restaurants/{id}` | | `{ ok }`. 타인 글 403 |
+
+- `name` 1~40자, `content` 10~10000자, `address` 1~300자, `imagePaths`는 본인 폴더의 실제 파일 1~5개다. 작성자는 세션 사용자이며 본문의 값은 무시한다.
+- 글과 이미지 경로는 `save_place` RPC 한 트랜잭션으로 저장한다. 실패하면 전체가 롤백되고 기존 파일은 지우지 않는다. 커밋 후 교체된 파일만 지운다.
+- 다른 글이 쓰는 경로는 409다.
+
 ## 이미지 업로드
 
 Vercel 함수는 요청 본문을 4.5MB로 제한하고, Supabase 재개 업로드는 청크를 6MB로 고정하므로 쓸 수 없다. 브라우저는 파일을 4MB 조각으로 나눠 BFF에 보내고, 서버는 비공개 `upload-chunk` 버킷에 임시 저장한 뒤 합친다.
