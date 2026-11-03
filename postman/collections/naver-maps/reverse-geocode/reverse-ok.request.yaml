@@ -1,0 +1,26 @@
+$kind: http-request
+name: 서울시청 좌표
+order: 1000
+method: GET
+url: '{{maps_base_url}}/map-reversegeocode/v2/gc?coords=126.9783882,37.5666103&orders=addr&output=json'
+headers:
+  - key: x-ncp-apigw-api-key-id
+    value: '{{naver_map_client_id}}'
+  - key: x-ncp-apigw-api-key
+    value: '{{naver_map_client_secret}}'
+queryParams:
+  - key: coords
+    value: '126.9783882,37.5666103'
+  - key: orders
+    value: 'addr'
+  - key: output
+    value: 'json'
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |
+      const body = pm.response.json();
+      const addr = body.results?.find((result) => result.name === "addr");
+      pm.test("status.code 0", () => { pm.response.to.have.status(200); pm.expect(body.status.code).to.equal(0); });
+      pm.test("addr 결과에 시/도와 번지가 있다", () => { pm.expect(addr.region.area1.name).to.be.a("string").and.not.empty; pm.expect(addr.land.number1).to.be.a("string").and.not.empty; });
+      pm.test("land.type은 1 또는 2", () => pm.expect(["1", "2"]).to.include(addr.land.type));

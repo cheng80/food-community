@@ -1,0 +1,24 @@
+$kind: http-request
+name: 바다 위 좌표
+order: 2000
+method: GET
+url: '{{maps_base_url}}/map-reversegeocode/v2/gc?coords=125.9913201,37.5666936&orders=addr&output=json'
+headers:
+  - key: x-ncp-apigw-api-key-id
+    value: '{{naver_map_client_id}}'
+  - key: x-ncp-apigw-api-key
+    value: '{{naver_map_client_secret}}'
+queryParams:
+  - key: coords
+    value: '125.9913201,37.5666936'
+  - key: orders
+    value: 'addr'
+  - key: output
+    value: 'json'
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |
+      const body = pm.response.json();
+      pm.test("200이고 status.code 3 no results", () => { pm.response.to.have.status(200); pm.expect(body.status.code).to.equal(3); });
+      pm.test("주소 결과가 없다", () => pm.expect(body.results ?? []).to.eql([]));

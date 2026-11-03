@@ -1,0 +1,17 @@
+$kind: http-request
+name: reverse 키 없이 호출
+order: 4000
+method: GET
+url: '{{maps_base_url}}/map-reversegeocode/v2/gc?coords=126.9783882,37.5666103&orders=addr&output=json'
+queryParams:
+  - key: coords
+    value: '126.9783882,37.5666103'
+  - key: orders
+    value: 'addr'
+  - key: output
+    value: 'json'
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |
+      pm.test("401 Authentication Failed", () => { pm.response.to.have.status(401); pm.expect(pm.response.json().error.errorCode).to.equal("200"); });

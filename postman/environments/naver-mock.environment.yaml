@@ -1,0 +1,42 @@
+name: naver-mock
+values:
+  - key: search_base_url
+    value: 'http://127.0.0.1:4610'
+    enabled: true
+    type: default
+  - key: maps_base_url
+    value: 'http://127.0.0.1:4610'
+    enabled: true
+    type: default
+  - key: sdk_base_url
+    value: 'http://127.0.0.1:4610'
+    enabled: true
+    type: default
+  - key: search_query
+    value: '광명 칼국수'
+    enabled: true
+    type: default
+  - key: no_result_query
+    value: '결과없음'
+    enabled: true
+    type: default
+  - key: naver_search_client_id
+    value: 'mock-id'
+    enabled: true
+    type: default
+  - key: naver_search_client_secret
+    value: 'mock-secret'
+    enabled: true
+    type: default
+  - key: naver_map_client_id
+    value: 'mock-id'
+    enabled: true
+    type: default
+  - key: naver_map_client_secret
+    value: 'mock-secret'
+    enabled: true
+    type: default
+  - key: naver_map_public_id
+    value: 'mock-id'
+    enabled: true
+    type: default

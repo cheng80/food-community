@@ -1,0 +1,28 @@
+$kind: http-request
+name: 검색 성공
+order: 1000
+method: GET
+url: '{{search_base_url}}/search/v1/local?query={{search_query}}&display=5&start=1&format=json'
+headers:
+  - key: X-NCP-APIGW-API-KEY-ID
+    value: '{{naver_search_client_id}}'
+  - key: X-NCP-APIGW-API-KEY
+    value: '{{naver_search_client_secret}}'
+queryParams:
+  - key: query
+    value: '{{search_query}}'
+  - key: display
+    value: '5'
+  - key: start
+    value: '1'
+  - key: format
+    value: 'json'
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |
+      const body = pm.response.json();
+      pm.test("200", () => pm.response.to.have.status(200));
+      pm.test("items는 5개 이하 배열", () => { pm.expect(body.items).to.be.an("array"); pm.expect(body.items.length).to.be.at.most(5); });
+      pm.test("앱이 쓰는 필드가 문자열", () => { for (const item of body.items) for (const field of ["title", "address", "roadAddress", "mapx", "mapy"]) pm.expect(item[field]).to.be.a("string"); });
+      pm.test("mapx, mapy는 숫자로 변환 가능 (WGS84 또는 1e7배)", () => { for (const item of body.items) { pm.expect(Number.isFinite(Number(item.mapx))).to.equal(true); pm.expect(Number.isFinite(Number(item.mapy))).to.equal(true); } });

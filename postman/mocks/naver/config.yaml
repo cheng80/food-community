@@ -1,0 +1,5 @@
+version: 1
+name: naver
+port: 4610
+mockSrc: default.js
+interceptRequests: true

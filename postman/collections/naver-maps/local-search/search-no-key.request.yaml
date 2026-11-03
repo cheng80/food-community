@@ -1,0 +1,19 @@
+$kind: http-request
+name: 검색 키 없이 호출
+order: 4000
+method: GET
+url: '{{search_base_url}}/search/v1/local?query=맛집&display=1&start=1&format=json'
+queryParams:
+  - key: query
+    value: '맛집'
+  - key: display
+    value: '1'
+  - key: start
+    value: '1'
+  - key: format
+    value: 'json'
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |
+      pm.test("401 Authentication Failed", () => { pm.response.to.have.status(401); pm.expect(pm.response.json().error.errorCode).to.equal("200"); });

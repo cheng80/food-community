@@ -1,0 +1,42 @@
+name: naver-live
+values:
+  - key: search_base_url
+    value: 'https://naverapihub.apigw.ntruss.com'
+    enabled: true
+    type: default
+  - key: maps_base_url
+    value: 'https://maps.apigw.ntruss.com'
+    enabled: true
+    type: default
+  - key: sdk_base_url
+    value: 'https://oapi.map.naver.com'
+    enabled: true
+    type: default
+  - key: search_query
+    value: '광명 칼국수'
+    enabled: true
+    type: default
+  - key: no_result_query
+    value: '쀍쀍없는장소쀍쀍'
+    enabled: true
+    type: default
+  - key: naver_search_client_id
+    value: ''
+    enabled: true
+    type: secret
+  - key: naver_search_client_secret
+    value: ''
+    enabled: true
+    type: secret
+  - key: naver_map_client_id
+    value: ''
+    enabled: true
+    type: secret
+  - key: naver_map_client_secret
+    value: ''
+    enabled: true
+    type: secret
+  - key: naver_map_public_id
+    value: ''
+    enabled: true
+    type: default

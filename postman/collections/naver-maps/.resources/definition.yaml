@@ -1,0 +1,5 @@
+$kind: collection
+name: Naver Maps 연결 검증
+description: |
+  지역 검색(NAVER API HUB), Reverse Geocoding(Maps), Maps JS SDK 로드를 검증한다.
+  naver-mock 환경은 mock, naver-live 환경은 실제 NCP를 호출한다. 키는 파일에 넣지 않고 실행 시 전달한다.

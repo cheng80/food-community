@@ -1,0 +1,35 @@
+{
+  "search": {
+    "광명 칼국수": [
+      { "title": "광명 <b>칼국수</b>", "link": "", "category": "음식점>한식", "description": "", "telephone": "", "address": "경기도 광명시 철산동 123-4", "roadAddress": "경기도 광명시 광명로 123번길 8", "mapx": "1268650000", "mapy": "374800000" },
+      { "title": "철산 손<b>칼국수</b> &amp; 만두", "link": "", "category": "음식점>한식", "description": "", "telephone": "", "address": "경기도 광명시 철산동 456", "roadAddress": "경기도 광명시 철산로 30", "mapx": "1268701234", "mapy": "374756789" }
+    ],
+    "시청 좌표원본": [
+      { "title": "서울특별시청", "link": "", "category": "공공기관", "description": "", "telephone": "", "address": "서울특별시 중구 태평로1가 31", "roadAddress": "서울특별시 중구 세종대로 110", "mapx": "126.9783882", "mapy": "37.5666103" }
+    ],
+    "좌표오류": [
+      { "title": "좌표 없음", "link": "", "category": "", "description": "", "telephone": "", "address": "서울", "roadAddress": "", "mapx": "abc", "mapy": "" },
+      { "title": "좌표 0", "link": "", "category": "", "description": "", "telephone": "", "address": "서울", "roadAddress": "", "mapx": "0", "mapy": "0" },
+      { "title": "범위 밖", "link": "", "category": "", "description": "", "telephone": "", "address": "서울", "roadAddress": "", "mapx": "9999999999", "mapy": "9999999999" },
+      { "title": "<b></b>", "link": "", "category": "", "description": "", "telephone": "", "address": "서울", "roadAddress": "", "mapx": "1268650000", "mapy": "374800000" },
+      { "title": "주소 없음", "link": "", "category": "", "description": "", "telephone": "", "address": "", "roadAddress": "", "mapx": "1268650000", "mapy": "374800000" },
+      { "title": "정상", "link": "", "category": "", "description": "", "telephone": "", "address": "경기도 광명시 철산동 1", "roadAddress": "", "mapx": "1268650000", "mapy": "374800000" }
+    ],
+    "결과없음": []
+  },
+  "reverse": {
+    "126.9783882,37.5666103": { "areas": ["서울특별시", "중구", "태평로1가", ""], "land": { "type": "1", "number1": "31", "number2": "" } },
+    "126.9780000,37.5660000": { "areas": ["서울특별시", "중구", "태평로1가", ""], "land": { "type": "1", "number1": "31", "number2": "" } },
+    "127.5863000,34.9751000": { "areas": ["전라남도", "광양시", "광양읍", "읍내리"], "land": { "type": "1", "number1": "123", "number2": "4" } },
+    "128.6000000,35.9000000": { "areas": ["대구광역시", "동구", "도학동", ""], "land": { "type": "2", "number1": "45", "number2": "6" } },
+    "127.2654387,36.5008113": { "areas": ["세종특별자치시", "", "어진동", ""], "land": { "type": "1", "number1": "573", "number2": "" } },
+    "127.3000000,37.3000000": { "areas": ["경기도", "", "", ""], "land": { "type": "1", "number1": "", "number2": "" } }
+  },
+  "sea": ["125.9913201,37.5666936"],
+  "errors": {
+    "127.0000429,37.5000000": 429,
+    "127.0000500,37.5000000": 500,
+    "127.0000503,37.5000000": 503
+  },
+  "slow": "127.0000999,37.5000000"
+}

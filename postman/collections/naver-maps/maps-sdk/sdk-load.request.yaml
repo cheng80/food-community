@@ -1,0 +1,14 @@
+$kind: http-request
+name: SDK 스크립트 로드
+order: 1000
+method: GET
+url: '{{sdk_base_url}}/openapi/v3/maps.js?ncpKeyId={{naver_map_public_id}}'
+queryParams:
+  - key: ncpKeyId
+    value: '{{naver_map_public_id}}'
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |
+      pm.test("200 JavaScript", () => { pm.response.to.have.status(200); pm.expect(pm.response.headers.get("content-type")).to.include("javascript"); });
+      pm.test("본문이 있다", () => pm.expect(pm.response.text().length).to.be.above(100));

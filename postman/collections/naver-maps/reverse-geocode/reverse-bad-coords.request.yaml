@@ -1,0 +1,22 @@
+$kind: http-request
+name: 잘못된 좌표
+order: 3000
+method: GET
+url: '{{maps_base_url}}/map-reversegeocode/v2/gc?coords=abc&orders=addr&output=json'
+headers:
+  - key: x-ncp-apigw-api-key-id
+    value: '{{naver_map_client_id}}'
+  - key: x-ncp-apigw-api-key
+    value: '{{naver_map_client_secret}}'
+queryParams:
+  - key: coords
+    value: 'abc'
+  - key: orders
+    value: 'addr'
+  - key: output
+    value: 'json'
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |
+      pm.test("400 status.code 100", () => { pm.response.to.have.status(400); pm.expect(pm.response.json().status.code).to.equal(100); });
