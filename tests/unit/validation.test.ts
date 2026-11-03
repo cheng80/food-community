@@ -1,5 +1,6 @@
+import { readdirSync, readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
-import { detectImageType, imageError, isUuid, maxChunks, MAX_BYTES, ownsImage, restaurantErrors } from "@/lib/validation";
+import { CHUNK_BYTES, detectImageType, imageError, isUuid, maxChunks, MAX_BYTES, ownsImage, restaurantErrors } from "@/lib/validation";
 
 const user = "11111111-1111-4111-8111-111111111111";
 const file = "22222222-2222-4222-8222-222222222222";
@@ -49,5 +50,18 @@ describe("restaurantErrors", () => {
   });
   it.each([[0, 127], [37.5, 0], [91, 127], [37.5, 181], ["37.5", 127], [null, 127], [undefined, undefined], [NaN, 127], [Infinity, 127]])("잘못된 좌표 거부: %j, %j", (lat, lng) => {
     expect(restaurantErrors({ ...valid, lat, lng }).place).toBeTruthy();
+  });
+});
+
+describe("업로드 조각 정책", () => {
+  it("조각은 Vercel 4.5MB 요청 제한 아래이고 upload-chunk 버킷 제한과 같다", () => {
+    expect(CHUNK_BYTES).toBeLessThan(4.5 * 1000 * 1000);
+    const file = readdirSync("supabase/migrations").find((name) => name.endsWith("_upload_chunk_bucket.sql"))!;
+    expect(readFileSync(`supabase/migrations/${file}`, "utf8")).toContain(`'upload-chunk', 'upload-chunk', false, ${CHUNK_BYTES},`);
+  });
+  it("10MB와 5MB 파일을 조각 수 제한 안에서 나눈다", () => {
+    expect(maxChunks("place-image")).toBe(3);
+    expect(maxChunks("profile-image")).toBe(2);
+    expect(Math.ceil((10 * 1024 * 1024) / CHUNK_BYTES)).toBeLessThanOrEqual(maxChunks("place-image"));
   });
 });

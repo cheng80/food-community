@@ -65,7 +65,7 @@ export function LoginView() {
 
             <div className="flex flex-col items-center gap-(--spacing-12) px-(--spacing-20) pb-(--spacing-32)">
               <p className="label-md rounded-xl border border-border-default bg-background-default px-(--spacing-12) py-(--spacing-8) text-text-brand">
-                구글 계정으로 3초 만에 시작해요
+                구글 계정으로 시작해요
               </p>
               <GoogleLoginButton
                 disabled={busy || redirecting}
@@ -78,7 +78,6 @@ export function LoginView() {
               <Link href="/" className="label-lg text-text-on-image">
                 로그인 없이 둘러보기
               </Link>
-              <p className="label-md text-center text-text-tertiary">처음 로그인하면 이용약관과 개인정보 처리방침에 동의하게 됩니다.</p>
             </div>
           </main>
         </div>
