@@ -67,7 +67,7 @@ npm run storybook
 | 59 | Production에서 로그인, 10MB 경계 업로드, 지도, 수정, 소프트 삭제, 로그아웃. 휴대폰 설치는 사용자 보고 |
 | 60 | 문서 과제. 결제 코드 없음 |
 | 61 | Pencil 렌더, 정확 규격 배너, 샘플 흐름. [Day61 실행 방법](https://github.com/cheng80/food-community/blob/d12e66b375e55b58f85b57bd777e303d78ad7e39/docs/day61/README.md) |
-| 62 | 360·1280 샘플 흐름, 키보드, 중복 취소, `/api/*` 호출 0건. [Day62 실행 방법과 증거](https://github.com/cheng80/food-community/blob/d796a4aaa872966de0a3a85425160cdf7467c8d7/docs/day62/README.md) |
+| 62 | 360·1280 샘플 흐름, 키보드, 중복 취소, `/api/*` 호출 0건. [Day62 실행 방법과 증거](https://github.com/cheng80/food-community/blob/5c2079a919fb5012e7bb9ef5cde0e40881ef912d/docs/day62/README.md) |
 
 ## 한계
 

@@ -95,7 +95,8 @@
 - 학습 자료: https://lms.codebootcamp.co.kr/my/materials/6ec87625-0cff-41a5-ac59-90e1e6df6e6a (`nextjs에결제디자인핸드오프`)
 - 제출 페이지: 미확인. 과제 ID를 전달받지 못했고 추정하지 않았다. LMS의 과제 목록 https://lms.codebootcamp.co.kr/my/assignments 에서 찾는다.
 - 커밋: https://github.com/cheng80/food-community/commit/d796a4aaa872966de0a3a85425160cdf7467c8d7
-- 실행 방법과 화면 증거: https://github.com/cheng80/food-community/blob/d796a4aaa872966de0a3a85425160cdf7467c8d7/docs/day62/README.md
+- 실행 방법과 화면 증거: https://github.com/cheng80/food-community/blob/5c2079a919fb5012e7bb9ef5cde0e40881ef912d/docs/day62/README.md
+- 정정: 코드 커밋의 문서에 적힌 프레임 16·24는 16·17이 맞다. 정정 커밋 https://github.com/cheng80/food-community/commit/5c2079a919fb5012e7bb9ef5cde0e40881ef912d
 - 배포 없음: 04는 공개 저장소의 소스만 있고 배포하지 않았다. 공개 앱(33)에는 결제 화면이 없으니 배포 주소를 Day62 근거로 쓰지 않는다. 첨부 ZIP은 필요 없다.
 
 설명 (필요시 참고):
