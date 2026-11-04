@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/Button";
 import { Empty } from "@/components/ui/Empty";
 import { TabNavigation, TopNavigation } from "@/components/ui/Navigation";
 import { Modal } from "@/components/ui/Overlay";
-import { PaymentHistoryItem, SampleNotice } from "@/components/ui/Payment";
+import { PaymentCancelSheet, PaymentHistoryItem, SampleNotice } from "@/components/ui/Payment";
 import { PostRow } from "@/components/ui/PostRow";
 import { TextField } from "@/components/ui/TextField";
 import { nicknameError, shortAddress, timeAgo } from "@/lib/format";
@@ -36,6 +36,7 @@ export function MeView() {
   const now = useNow();
   const { show, toast } = useFlashToast();
   const fileRef = useRef<HTMLInputElement>(null);
+  const panelRef = useRef<HTMLDivElement>(null);
   const [nickname, setNickname] = useState<string>();
   const [avatarUrl, setAvatarUrl] = useState<string>();
   const [touched, setTouched] = useState(false);
@@ -59,7 +60,7 @@ export function MeView() {
   const error = touched ? nicknameError(draftName) : undefined;
   const target = mine.find((r) => r.id === deleteId);
   const cancelling = apps.find((a) => a.id === cancelId);
-  const cancelTitle = cancelling && findProgram(cancelling.programId)?.title;
+  const cancelProgram = cancelling && findProgram(cancelling.programId);
   const paid = apps.filter((a) => a.status === "paid");
   const cancelled = apps.filter((a) => a.status !== "paid");
 
@@ -156,7 +157,7 @@ export function MeView() {
 
         <section>
           <TabNavigation tabs={tabs} activeKey={tab} onChange={(key) => go({ tab: key })} className="border-b border-border-default" />
-          <div role="tabpanel" aria-label={tabs.find((t) => t.key === tab)?.label} className="flex flex-col gap-(--spacing-12) px-(--spacing-20) pt-(--spacing-16) pb-(--spacing-32) md:px-0">
+          <div ref={panelRef} tabIndex={-1} role="tabpanel" aria-label={tabs.find((t) => t.key === tab)?.label} className="outline-none flex flex-col gap-(--spacing-12) px-(--spacing-20) pt-(--spacing-16) pb-(--spacing-32) md:px-0">
             {tab !== "posts" && <SampleNotice />}
             {tab === "payments" &&
               (paid.length > 0 ? <div className="flex flex-col">{paid.map(row)}</div> : <div className="flex justify-center py-(--spacing-24)"><Empty title="샘플 결제 내역이 없어요" description="배너에서 요리 수업을 살펴보세요" primaryLabel="요리 수업 보기" onPrimary={() => router.push("/programs/sushi-bento")} /></div>)}
@@ -191,18 +192,19 @@ export function MeView() {
         </section>
       </main>
 
-      <Modal
-        open={!!cancelling}
-        title="샘플 취소할까요?"
-        description={`‘${cancelTitle ?? ""}’ 샘플 신청을 취소해요. 실제 환불은 일어나지 않아요.`}
-        confirmLabel="샘플 취소"
-        cancelLabel="닫기"
+      <PaymentCancelSheet
+        open={!!cancelProgram}
+        title={cancelProgram?.title ?? ""}
+        amount={formatPrice(cancelProgram?.price ?? 0)}
+        method={cancelling?.method ?? ""}
         onClose={() => setCancelId(undefined)}
         onConfirm={() => {
           if (cancelId) sampleActions.cancel(cancelId);
           setCancelId(undefined);
           go({ tab: "cancels" });
           show({ variant: "success", message: "샘플 신청을 취소했어요" });
+          // 취소한 행이 사라져 시트가 돌려줄 버튼이 없으므로 취소 내역 패널로 포커스를 옮긴다.
+          setTimeout(() => panelRef.current?.focus());
         }}
       />
       <Modal

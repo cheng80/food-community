@@ -75,7 +75,7 @@ export function ProgramView({ id }: { id: string }) {
               {applied ? (
                 <Button size="lg" variant="secondary" className="w-full" onClick={() => router.push("/me?tab=payments")}>이미 신청했어요 · 결제 내역 보기</Button>
               ) : (
-                <Button size="lg" className="w-full" disabled={full} onClick={openSheet}>{full ? "정원이 찼어요" : "결제하기"}</Button>
+                <Button size="lg" className="w-full" disabled={full} onClick={openSheet}>{full ? "정원이 찼어요" : "수업 참여하기"}</Button>
               )}
             </div>
           </div>

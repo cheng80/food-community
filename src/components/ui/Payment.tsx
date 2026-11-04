@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Button } from "./Button";
 import { Badge, type BadgeProps } from "./Feedback";
 import { Icon, type IconName } from "./Icon";
+import { BottomSheet } from "./Overlay";
 
 /** design.pen program/banner · 문구는 이미지에 들어 있어 링크 이름으로만 읽힌다 (대체 텍스트 중복 없음) */
 export function ProgramBanner({ href, label }: { href: string; label: string }) {
@@ -90,5 +91,34 @@ export function PaymentHistoryItem({ href, title, meta, amount, status, onCancel
         )}
       </div>
     </article>
+  );
+}
+
+export interface PaymentCancelSheetProps {
+  open: boolean;
+  title: string;
+  amount: string;
+  method: string;
+  onClose: () => void;
+  onConfirm: () => void;
+}
+
+/** bottom-sheet에 payment/sample-notice · payment/summary-row · button을 조합한 결제 취소 확인 시트 */
+export function PaymentCancelSheet({ open, title, amount, method, onClose, onConfirm }: PaymentCancelSheetProps) {
+  return (
+    <BottomSheet open={open} title="샘플 결제를 취소할까요?" onClose={onClose} className="max-h-dvh max-w-full! overflow-y-auto outline-none sm:max-w-[480px]!">
+      <div className="flex w-full flex-col gap-(--spacing-16)">
+        <SampleNotice>샘플 취소예요. 실제 결제와 환불은 일어나지 않아요.</SampleNotice>
+        <dl className="flex flex-col gap-(--spacing-8)">
+          <SummaryRow label="프로그램" value={title} />
+          <SummaryRow label="결제 수단" value={method} />
+          <SummaryRow label="참가비" value={`${amount} (샘플)`} />
+        </dl>
+        <div className="flex gap-(--spacing-8)">
+          <Button variant="secondary" size="lg" className="flex-1" onClick={onClose}>닫기</Button>
+          <Button size="lg" className="flex-1" onClick={onConfirm}>샘플 취소</Button>
+        </div>
+      </div>
+    </BottomSheet>
   );
 }
