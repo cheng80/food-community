@@ -1,6 +1,6 @@
 # Day55~62 제출 안내
 
-제출은 사용자가 직접 한다. LMS의 URL 칸에 아래 표의 Day별 URL을 그대로 입력하면 된다. URL 제출만 필요하다. 브랜치를 삭제해도 아래 원본 커밋은 `main` 이력에 남아 URL이 유지된다. 소스는 공개 저장소 https://github.com/cheng80/food-community 에 있고, Day별 설명은 필요할 때 참고한다.
+제출은 사용자가 직접 한다. Day55~61은 아래 기존 URL을 참고한다. Day62 실제 과제는 디자인 핸드오프와 페이앱 연동·테스트를 함께 요구한다. 링크 또는 파일 중 하나로 제출할 수 있으며 파일은 개당 25MB·최대 10개다. 소스는 공개 저장소 https://github.com/cheng80/food-community 에 정리한다.
 
 **공통 상태:** 공개 배포 주소는 https://food-community-nine.vercel.app 이고 최종 폴더 `33-food-deploy-pwa`의 `8c7fe0a`를 Git 연결 없이 CLI로 올린 것이다. 저장소는 `main` 하나만 유지하며 단계별 원본 커밋을 그 이력에 보존했다. 현재 앱 파일은 33 기준이며 배포 소스와 문서 이력은 구분한다. 저장소를 공개해도 재배포나 Vercel 연결은 하지 않았다. 검증 글은 모두 소프트 삭제했고, 이후 사용자가 글 1개를 직접 등록했다고 보고했다.
 
@@ -13,7 +13,7 @@
 | 59 | https://food-community-nine.vercel.app | 없음 (휴대폰 설치·아이콘 실행은 사용자 확인, 스플래시 미확인) |
 | 60 | https://github.com/cheng80/food-community/commit/e31d9344d67b8ac612593f64c0f715514bb83598 | 가격·PG·환불 등 정책 결정 (문서 과제는 완료) |
 | 61 | https://github.com/cheng80/food-community/commit/d12e66b375e55b58f85b57bd777e303d78ad7e39 | 샘플 UI. 실제 결제·배포 없음 (아래 Day61) |
-| 62 | https://github.com/cheng80/food-community/commit/d796a4aaa872966de0a3a85425160cdf7467c8d7 | 샘플 UI. 실제 결제·배포 없음. 과제 미생성: 2026-11-04 14:00 KST 이후 생성 예정 (사용자 확인, 아래 Day62) |
+| 62 | https://github.com/cheng80/food-community/tree/main/06-payment-link | 핸드오프는 기존 커밋, 결제 링크 소스와 실제 네이버페이 1,000원 결제완료 확인은 새 폴더. 공개 배포·LMS 제출 없음 |
 
 ## Day55 데이터 설계
 
@@ -90,18 +90,22 @@
 
 남은 항목: 사용자 LMS 직접 제출.
 
-## Day62 Next.js에 결제 디자인 핸드오프
+## Day62 디자인 핸드오프 및 결제 연동하기
 
-- 학습 자료: https://lms.codebootcamp.co.kr/my/materials/6ec87625-0cff-41a5-ac59-90e1e6df6e6a (`nextjs에결제디자인핸드오프`)
-- 제출 페이지: 아직 과제가 생성되지 않았다. 사용자 확인에 따르면 2026-11-04 오후 2시(14:00 KST) 이후 생성 예정이다. 생성 후 LMS 과제 목록 https://lms.codebootcamp.co.kr/my/assignments 에서 확인해 위 커밋 URL을 직접 제출한다. 개별 제출 페이지 URL은 아직 없으며 과제 ID는 추정하지 않았다.
-- 커밋: https://github.com/cheng80/food-community/commit/d796a4aaa872966de0a3a85425160cdf7467c8d7
-- 실행 방법과 화면 증거: https://github.com/cheng80/food-community/blob/5c2079a919fb5012e7bb9ef5cde0e40881ef912d/docs/day62/README.md
-- 정정: 코드 커밋의 문서에 적힌 프레임 16·24는 16·17이 맞다. 정정 커밋 https://github.com/cheng80/food-community/commit/5c2079a919fb5012e7bb9ef5cde0e40881ef912d
-- 배포 없음: 04는 공개 저장소의 소스만 있고 배포하지 않았다. 공개 앱(33)에는 결제 화면이 없으니 배포 주소를 Day62 근거로 쓰지 않는다. 첨부 ZIP은 필요 없다.
+- 제출 페이지: https://lms.codebootcamp.co.kr/my/assignments/6fe03a0f-6a25-436e-bcd5-05e38dcc2178
+- 마감: **2026-11-05 10:00 KST**. 조회 당시 미제출.
+- 요구사항: 디자인 핸드오프, 페이앱 연동 및 테스트. 제출 여부와 코드 리뷰로 확인한다.
+- 제출 UI: `제출 링크 (배포 주소 또는 PR)`, 또는 이미지·PDF·ZIP 파일. 파일당 25MB·최대 10개. 페이앱 결제창만으로는 소스 코드를 검토할 수 없으므로 단독 제출 주소로 사용하지 않는다.
+- 결제 연동 소스·검증·핸드오프 참조: https://github.com/cheng80/food-community/tree/main/06-payment-link
+- 디자인 핸드오프 커밋: https://github.com/cheng80/food-community/commit/d796a4aaa872966de0a3a85425160cdf7467c8d7
+- 핸드오프 실행 방법·화면 증거: https://github.com/cheng80/food-community/blob/5c2079a919fb5012e7bb9ef5cde0e40881ef912d/docs/day62/README.md
+- 정정: 코드 커밋 문서의 프레임 16·24는 16·17이 맞다. 정정 커밋 https://github.com/cheng80/food-community/commit/5c2079a919fb5012e7bb9ef5cde0e40881ef912d
+- 참고 결제창: https://www.payapp.kr/L/z4nwCC (실제 결제를 진행하면 1,000원 청구)
+- 학습 자료: [디자인 핸드오프](https://lms.codebootcamp.co.kr/my/materials/6ec87625-0cff-41a5-ac59-90e1e6df6e6a), [결제 링크 연동](https://lms.codebootcamp.co.kr/my/materials/a64483e9-00a0-4326-befc-7e4c130f4de1)
 
 설명 (필요시 참고):
-> 어제 복제한 04-food-handoff-payment에서 7화면(메인 배너, 배너 상세, 수업 참여하기 버튼을 눌렀을 때, 결제 완료, 결제 내역 탭, 결제 취소 바텀시트, 결제 취소 내역 탭)에 남은 차이를 고쳤습니다. 상세 버튼을 `수업 참여하기`로 바꾸고, 결제 취소를 중앙 모달에서 기존 BottomSheet와 공통 버튼을 조합한 바텀시트로 바꿨습니다. 글 삭제 모달은 그대로 두었습니다. 새 조합은 Storybook 스토리를 먼저 추가해 실제 화면에서 사용했습니다. 360 모바일과 1280 데스크톱에서 동의, 샘플 완료, 결제 내역, 취소 바텀시트, 취소 내역 흐름과 닫기, Esc, 키보드 포커스, 중복 취소 방지를 확인했고 `/api/*` 호출은 0건입니다. 결제는 화면 흐름만 보여 주는 샘플이며 실제 결제와 환불은 일어나지 않습니다. 코드는 https://github.com/cheng80/food-community/commit/d796a4aaa872966de0a3a85425160cdf7467c8d7 에 있습니다. 배포하지 않았으니 실행 방법은 커밋의 docs/day62/README.md를 봐 주세요.
+> 디자인 핸드오프는 기존 공통 컴포넌트와 Storybook을 사용해 7화면을 구현하고 수업 참여하기 버튼과 결제 취소 바텀시트를 보완했습니다. 결제 링크 실습은 별도 Next.js 앱 `06-payment-link`에서 기존 배너와 디자인 토큰을 재사용해 1,000원 요리 수업 상품을 소개하고, 페이앱 팝업·일반 링크·QR을 연결했습니다. 단위 테스트 4개, lint·타입 검사·빌드를 통과했고, QR 해독 결과와 실제 팝업의 상품·금액, 320·360·1280px 배치를 확인했습니다. 사용자가 네이버페이 결제를 진행한 뒤 판매자 관리 화면에서 1,000원 결제완료도 직접 확인했습니다. 승인과 정산 완료는 구분하며 실제 입금은 확인하지 않았습니다.
 
-한계: `Payment` 스토리 9개 통과, `Modal Busy` 스토리 1개 실패(Day61과 같은 기존 문제). `design.pen`은 바꾸지 않았다. 실제 터치 기기와 화면 낭독기는 확인하지 않았다.
+한계: 기존 핸드오프의 `Payment` 스토리 9개는 통과했고 `Modal Busy` 스토리 1개는 Day61과 같은 기존 실패다. 새 결제 링크 스토리는 작성했으나 play 자동 실행은 하지 않았다. 실제 휴대폰 QR 결제·환불·정산 완료·공개 배포는 미검증이다. 공개 앱(33)에는 이번 결제 화면이 없으므로 그 배포 주소를 Day62 결과로 사용하지 않는다. 거래번호·연락처·승인정보·결제 후 관리자 화면은 공개하지 않는다.
 
-남은 항목: 제출 페이지 URL 확인, 사용자 LMS 직접 제출.
+남은 항목: 사용자 LMS 직접 제출. 정산 완료 여부는 과제의 결제 연동·테스트와 별도로 확인한다.

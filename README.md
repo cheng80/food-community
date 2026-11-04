@@ -6,7 +6,7 @@
 - 기술: Next.js 16, React 19, Tailwind CSS 4, Supabase, 네이버 지도·검색 API, Storybook, PWA
 
 > [!NOTE]
-> 브랜치는 `main` 하나만 유지합니다. 현재 실행 파일은 최종 단계 `33-food-deploy-pwa` 기준이며, Day55~62의 단계별 커밋은 원래 SHA 그대로 `main` 이력에 보존했습니다. 공개 앱은 `8c7fe0a`를 Vercel CLI로 올린 것이고 이 저장소와 연결되어 있지 않습니다. 저장소에 push해도 배포되지 않습니다.
+> 브랜치는 `main` 하나만 유지합니다. 루트 실행 파일은 최종 단계 `33-food-deploy-pwa` 기준이며, 별도 결제 링크 실습은 [`06-payment-link`](06-payment-link/README.md)에 있습니다. Day55~62의 단계별 커밋은 원래 SHA 그대로 `main` 이력에 보존했습니다. 공개 앱은 `8c7fe0a`를 Vercel CLI로 올린 것이고 이 저장소와 연결되어 있지 않습니다. 저장소에 push해도 배포되지 않습니다.
 
 ## 실행
 
@@ -52,9 +52,9 @@ npm run storybook
 | 59 | [9e494ae](https://github.com/cheng80/food-community/commit/9e494ae228faf2287850c500b5df6cc978f718e9) | 배포·PWA·실제 연동 확인 |
 | 60 | [e31d934](https://github.com/cheng80/food-community/commit/e31d9344d67b8ac612593f64c0f715514bb83598) | PRD v0.4 |
 | 61 | [디자인 ce56aac](https://github.com/cheng80/food-community/commit/ce56aacf8755ccc76fce8cc43baf19662bc96201), [핸드오프 d12e66b](https://github.com/cheng80/food-community/commit/d12e66b375e55b58f85b57bd777e303d78ad7e39) | 결제 화면·배너·8화면 UI 샘플 |
-| 62 | [핸드오프 보완 d796a4a](https://github.com/cheng80/food-community/commit/d796a4aaa872966de0a3a85425160cdf7467c8d7) | `수업 참여하기` 버튼·결제 취소 바텀시트·7화면 UI 샘플 |
+| 62 | [핸드오프 보완 d796a4a](https://github.com/cheng80/food-community/commit/d796a4aaa872966de0a3a85425160cdf7467c8d7), [결제 링크 소스](06-payment-link/README.md) | 디자인 핸드오프, 페이앱 팝업·QR, 실제 네이버페이 1,000원 결제완료 확인 |
 
-이력 보존 병합은 현재 앱 파일을 유지합니다. Day61·62 샘플은 해당 커밋에서 확인하며, 실제 결제·공개 배포에 반영하지 않았습니다. 이전 커밋의 문서에 있는 브랜치명, "로컬에만 있음", "push하지 않음", "ZIP" 표현은 그 시점의 기록입니다.
+이력 보존 병합은 현재 앱 파일을 유지합니다. Day61·62 핸드오프 샘플은 해당 커밋에서 확인합니다. Day62 결제 링크 실습은 `06-payment-link`에서 별도 실행하며 실제 결제 테스트를 완료했습니다. 공개 앱에는 반영하지 않았습니다. 이전 커밋의 문서에 있는 브랜치명, "로컬에만 있음", "push하지 않음", "ZIP" 표현은 그 시점의 기록입니다.
 
 ## Day별 제출과 검증
 
@@ -67,12 +67,12 @@ npm run storybook
 | 59 | Production에서 로그인, 10MB 경계 업로드, 지도, 수정, 소프트 삭제, 로그아웃. 휴대폰 설치는 사용자 보고 |
 | 60 | 문서 과제. 결제 코드 없음 |
 | 61 | Pencil 렌더, 정확 규격 배너, 샘플 흐름. [Day61 실행 방법](https://github.com/cheng80/food-community/blob/d12e66b375e55b58f85b57bd777e303d78ad7e39/docs/day61/README.md) |
-| 62 | 360·1280 샘플 흐름, 키보드, 중복 취소, `/api/*` 호출 0건. [Day62 실행 방법과 증거](https://github.com/cheng80/food-community/blob/5c2079a919fb5012e7bb9ef5cde0e40881ef912d/docs/day62/README.md) |
+| 62 | [핸드오프 실행 방법과 증거](https://github.com/cheng80/food-community/blob/5c2079a919fb5012e7bb9ef5cde0e40881ef912d/docs/day62/README.md), [페이앱 연동·실제 결제 검증](06-payment-link/README.md) |
 
 ## 한계
 
 - 사용자가 1명이라 타인 글 차단, 실제 세션 HttpOnly 속성은 실제 환경에서 확인하지 못했습니다. 실제 10MB 음식 사진, 스플래시 화면도 확인하지 않았습니다.
-- 결제는 Day61·62 커밋의 UI 샘플이며 현재 `main` 실행 파일과 공개 앱에는 포함되지 않습니다. 실제 결제와 환불은 일어나지 않고 가격·PG·환불 규정은 정하지 않았습니다.
+- Day61·62 핸드오프의 결제·취소 내역은 UI 샘플입니다. 별도 `06-payment-link`는 실제 페이앱 1,000원 결제를 연결하므로 이용 시 실제 금액이 청구됩니다. 실제 환불·정산 완료는 검증하지 않았고 자동 주문 확정 API는 없습니다. 공개 앱에는 결제 화면이 포함되지 않습니다.
 - Day61: `Payment` 스토리 8개 통과. `Modal Busy` 스토리 1개 실패, 33 원본 `Overlay.tsx`에서도 같습니다.
 - Day62: `Payment` 스토리 9개 통과. 같은 `Modal Busy` 1개는 계속 실패합니다. `design.pen`은 바꾸지 않아 버튼 문구와 취소 시트는 Storybook과 코드 기준입니다.
 
