@@ -1,4 +1,4 @@
-# Day55~61 제출 안내
+# Day55~62 제출 안내
 
 제출은 사용자가 직접 한다. LMS의 URL 칸에 아래 표의 Day별 URL을 그대로 입력하면 된다. URL 제출만 필요하다. 브랜치를 삭제해도 아래 원본 커밋은 `main` 이력에 남아 URL이 유지된다. 소스는 공개 저장소 https://github.com/cheng80/food-community 에 있고, Day별 설명은 필요할 때 참고한다.
 
@@ -13,6 +13,7 @@
 | 59 | https://food-community-nine.vercel.app | 없음 (휴대폰 설치·아이콘 실행은 사용자 확인, 스플래시 미확인) |
 | 60 | https://github.com/cheng80/food-community/commit/e31d9344d67b8ac612593f64c0f715514bb83598 | 가격·PG·환불 등 정책 결정 (문서 과제는 완료) |
 | 61 | https://github.com/cheng80/food-community/commit/d12e66b375e55b58f85b57bd777e303d78ad7e39 | 샘플 UI. 실제 결제·배포 없음 (아래 Day61) |
+| 62 | https://github.com/cheng80/food-community/commit/d796a4aaa872966de0a3a85425160cdf7467c8d7 | 샘플 UI. 실제 결제·배포 없음. 제출 페이지 URL 미확인 (아래 Day62) |
 
 ## Day55 데이터 설계
 
@@ -88,3 +89,18 @@
 한계: `Payment` 스토리 8개 통과, `Modal Busy` 스토리 1개 실패(33 원본 `Overlay.tsx`에서도 동일). 가격·PG·환불 등 정책 결정은 Day60과 같이 열려 있다.
 
 남은 항목: 사용자 LMS 직접 제출.
+
+## Day62 Next.js에 결제 디자인 핸드오프
+
+- 학습 자료: https://lms.codebootcamp.co.kr/my/materials/6ec87625-0cff-41a5-ac59-90e1e6df6e6a (`nextjs에결제디자인핸드오프`)
+- 제출 페이지: 미확인. 과제 ID를 전달받지 못했고 추정하지 않았다. LMS의 과제 목록 https://lms.codebootcamp.co.kr/my/assignments 에서 찾는다.
+- 커밋: https://github.com/cheng80/food-community/commit/d796a4aaa872966de0a3a85425160cdf7467c8d7
+- 실행 방법과 화면 증거: https://github.com/cheng80/food-community/blob/d796a4aaa872966de0a3a85425160cdf7467c8d7/docs/day62/README.md
+- 배포 없음: 04는 공개 저장소의 소스만 있고 배포하지 않았다. 공개 앱(33)에는 결제 화면이 없으니 배포 주소를 Day62 근거로 쓰지 않는다. 첨부 ZIP은 필요 없다.
+
+설명 (필요시 참고):
+> 어제 복제한 04-food-handoff-payment에서 7화면(메인 배너, 배너 상세, 수업 참여하기 버튼을 눌렀을 때, 결제 완료, 결제 내역 탭, 결제 취소 바텀시트, 결제 취소 내역 탭)에 남은 차이를 고쳤습니다. 상세 버튼을 `수업 참여하기`로 바꾸고, 결제 취소를 중앙 모달에서 기존 BottomSheet와 공통 버튼을 조합한 바텀시트로 바꿨습니다. 글 삭제 모달은 그대로 두었습니다. 새 조합은 Storybook 스토리를 먼저 추가해 실제 화면에서 사용했습니다. 360 모바일과 1280 데스크톱에서 동의, 샘플 완료, 결제 내역, 취소 바텀시트, 취소 내역 흐름과 닫기, Esc, 키보드 포커스, 중복 취소 방지를 확인했고 `/api/*` 호출은 0건입니다. 결제는 화면 흐름만 보여 주는 샘플이며 실제 결제와 환불은 일어나지 않습니다. 코드는 https://github.com/cheng80/food-community/commit/d796a4aaa872966de0a3a85425160cdf7467c8d7 에 있습니다. 배포하지 않았으니 실행 방법은 커밋의 docs/day62/README.md를 봐 주세요.
+
+한계: `Payment` 스토리 9개 통과, `Modal Busy` 스토리 1개 실패(Day61과 같은 기존 문제). `design.pen`은 바꾸지 않았다. 실제 터치 기기와 화면 낭독기는 확인하지 않았다.
+
+남은 항목: 제출 페이지 URL 확인, 사용자 LMS 직접 제출.
