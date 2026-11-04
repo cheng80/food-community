@@ -57,7 +57,7 @@ npx next start -p 3061
 ## 한계
 
 - `Modal Busy` 스토리 실패는 Day61에서 33 원본 `Overlay.tsx`로도 같다고 확인한 기존 문제다. `Overlay.tsx`를 바꾸지 않았고 고치지 않았다.
-- `design.pen`은 바꾸지 않았다. 프레임 16·24의 버튼은 `결제하기`로 남아 있고 결제 취소 바텀시트 프레임은 없다. 이 저장소의 디자인 SSOT는 Storybook이며 `Cancel Sheet` 스토리가 이를 담는다. 작업 당시 Pencil 앱에 03 원본이 열려 있어 03 변경 위험을 피했다.
+- `design.pen`은 바꾸지 않았다. 프레임 16·17의 버튼은 `결제하기`로 남아 있고 결제 취소 바텀시트 프레임은 없다 (Pencil 읽기로 확인). 이 저장소의 디자인 SSOT는 Storybook이며 `Cancel Sheet` 스토리가 이를 담는다. 작업 당시 Pencil 앱에 03 원본이 열려 있어 03 변경 위험을 피했다.
 - 실제 터치 기기, 실제 화면 낭독기는 확인하지 않았다. 360은 Ego 브라우저의 기기 에뮬레이션이고 입력은 CDP로 보냈다.
 - 제출 페이지 URL은 확인하지 못했다. LMS 자료 제목과 7화면 요구는 외부 감독이 전달한 내용을 사용했고, LMS를 직접 열지 않았다.
 - 실제 PG, 결제, 환불, DB, Supabase, Naver, OAuth, Production, Vercel은 건드리지 않았다.
