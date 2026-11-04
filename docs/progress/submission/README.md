@@ -13,7 +13,7 @@
 | 59 | https://food-community-nine.vercel.app | 없음 (휴대폰 설치·아이콘 실행은 사용자 확인, 스플래시 미확인) |
 | 60 | https://github.com/cheng80/food-community/commit/e31d9344d67b8ac612593f64c0f715514bb83598 | 가격·PG·환불 등 정책 결정 (문서 과제는 완료) |
 | 61 | https://github.com/cheng80/food-community/commit/d12e66b375e55b58f85b57bd777e303d78ad7e39 | 샘플 UI. 실제 결제·배포 없음 (아래 Day61) |
-| 62 | https://github.com/cheng80/food-community/commit/d796a4aaa872966de0a3a85425160cdf7467c8d7 | 샘플 UI. 실제 결제·배포 없음. 제출 페이지 URL 미확인 (아래 Day62) |
+| 62 | https://github.com/cheng80/food-community/commit/d796a4aaa872966de0a3a85425160cdf7467c8d7 | 샘플 UI. 실제 결제·배포 없음. 과제 미생성: 2026-11-04 14:00 KST 이후 생성 예정 (사용자 확인, 아래 Day62) |
 
 ## Day55 데이터 설계
 
@@ -93,7 +93,7 @@
 ## Day62 Next.js에 결제 디자인 핸드오프
 
 - 학습 자료: https://lms.codebootcamp.co.kr/my/materials/6ec87625-0cff-41a5-ac59-90e1e6df6e6a (`nextjs에결제디자인핸드오프`)
-- 제출 페이지: 미확인. 과제 ID를 전달받지 못했고 추정하지 않았다. LMS의 과제 목록 https://lms.codebootcamp.co.kr/my/assignments 에서 찾는다.
+- 제출 페이지: 아직 과제가 생성되지 않았다. 사용자 확인에 따르면 2026-11-04 오후 2시(14:00 KST) 이후 생성 예정이다. 생성 후 LMS 과제 목록 https://lms.codebootcamp.co.kr/my/assignments 에서 확인해 위 커밋 URL을 직접 제출한다. 개별 제출 페이지 URL은 아직 없으며 과제 ID는 추정하지 않았다.
 - 커밋: https://github.com/cheng80/food-community/commit/d796a4aaa872966de0a3a85425160cdf7467c8d7
 - 실행 방법과 화면 증거: https://github.com/cheng80/food-community/blob/5c2079a919fb5012e7bb9ef5cde0e40881ef912d/docs/day62/README.md
 - 정정: 코드 커밋의 문서에 적힌 프레임 16·24는 16·17이 맞다. 정정 커밋 https://github.com/cheng80/food-community/commit/5c2079a919fb5012e7bb9ef5cde0e40881ef912d
