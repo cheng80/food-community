@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { InstallPrompt } from "@/components/app/InstallPrompt";
 import { RestaurantGrid } from "@/components/app/RestaurantCard";
@@ -8,10 +9,13 @@ import { Button } from "@/components/ui/Button";
 import { Empty } from "@/components/ui/Empty";
 import { Icon } from "@/components/ui/Icon";
 import { Menu, MenuItem } from "@/components/ui/Menu";
+import { ProgramMedia } from "@/components/ui/ProgramMedia";
 import { TopNavigation } from "@/components/ui/Navigation";
 import { Spinner } from "@/components/ui/Spinner";
 import { TextField } from "@/components/ui/TextField";
 import { useAppState } from "@/lib/store";
+import { request } from "@/lib/api";
+import type { Product } from "@/lib/products";
 
 const PAGE = 10;
 const sorts = { latest: "최신순", name: "이름순" } as const;
@@ -20,6 +24,7 @@ type Sort = keyof typeof sorts;
 export function HomeView() {
   const router = useRouter();
   const { restaurants } = useAppState();
+  const [products, setProducts] = useState<Product[]>([]);
   const [query, setQuery] = useState("");
   const [sort, setSort] = useState<Sort>("latest");
   const [sortOpen, setSortOpen] = useState(false);
@@ -32,6 +37,13 @@ export function HomeView() {
     return [...hits].sort((a, b) => (sort === "name" ? a.title.localeCompare(b.title, "ko") : b.createdAt - a.createdAt));
   }, [restaurants, query, sort]);
   const hasMore = visible < results.length;
+
+  useEffect(() => {
+    const controller = new AbortController();
+    request<{ products: Product[] }>("/api/products", { signal: controller.signal })
+      .then(({ products }) => setProducts(products)).catch(() => undefined);
+    return () => controller.abort();
+  }, []);
 
   // 무한 스크롤 — 하단 로딩 영역이 보이면 다음 PAGE개
   useEffect(() => {
@@ -63,6 +75,14 @@ export function HomeView() {
         className="sticky top-0 z-30"
       />
       <main className="mx-auto w-full max-w-page flex-1 pb-20">
+        {products.map(({ id, name, images }) => (
+          <Link key={id} href={`/programs/${id}`} aria-label={`${name} 상세 보기`}
+            className="block px-(--spacing-20) pb-(--spacing-8) outline-offset-2 focus-visible:outline-2 focus-visible:outline-background-brand">
+            {images.banner_mobile
+              ? <ProgramMedia mobile={images.banner_mobile} desktop={images.banner_desktop} alt="" />
+              : <span className="heading-sm text-text-brand">{name}</span>}
+          </Link>
+        ))}
         <InstallPrompt />
         <div className="px-(--spacing-20) py-(--spacing-8)">
           <TextField

@@ -1,6 +1,6 @@
 # BFF API 계약
 
-브라우저는 `/api/*`와 `/auth/callback`만 호출한다. 쓰기 요청은 같은 출처 `Origin`이 없으면 403이다. 오류 본문은 `{ "error": "한국어 메시지" }`이고 응답은 `Cache-Control: private, no-store`다.
+브라우저의 앱 데이터 요청은 `/api/*`와 `/auth/callback`을 거친다. 이미지 다운로드와 포트원 SDK 결제창은 각 서비스가 제공한다. 쓰기 요청은 같은 출처 `Origin`이 없으면 403이다. 오류 본문은 `{ "error": "한국어 메시지" }`이고 응답은 `Cache-Control: private, no-store`다.
 
 공통 상태: `400` 입력 오류, `401` 비로그인, `403` 출처 또는 소유권 오류, `404` 없는 자원, `409` 상태 충돌, `413` 크기 초과, `415` JSON 아님, `502` Supabase 오류, `503` 환경변수 없음.
 
@@ -37,6 +37,17 @@
 - 삭제하면 `deleted_at`을 기록한다. 이후 목록, 상세, 마이 페이지, 수정, 재삭제는 없는 글로 처리한다(404). Data API 직접 조회도 RLS로 막힌다. 이미지 행과 파일은 보존하므로, 공개 URL을 아는 사람은 파일 자체를 계속 받을 수 있다.
 
 `Restaurant` 응답의 `placeName`, `lat`, `lng`는 좌표 도입 전 글이면 null이다. 추정값을 넣지 않으며 그 글을 수정하려면 장소를 다시 골라야 한다.
+
+## 상품과 테스트 결제
+
+| 메서드 | 경로 | 요청 | 응답 |
+| --- | --- | --- | --- |
+| GET | `/api/products` | | `{ products }` 공개 상품 최신순 |
+| GET | `/api/products/{id}` | | `{ product }` 공개 상품과 이미지 URL. 없으면 404 |
+| POST | `/api/payments` | `{ productId }` | 201 PortOne SDK 요청. 가격은 서버가 결정 |
+| POST | `/api/payments/confirm` | `{ productId, paymentId }` | `{ name, amount }` 검증·저장 완료 또는 동일 승인 재조회 |
+
+결제 요청에는 인증과 같은 출처가 필요하다. 포트원 미승인·정보 불일치는 409, 포트원 접속 오류는 502, 키 누락이나 인증 거절은 503이다. 자세한 원칙은 [결제 규칙](../.claude/rules/payment.md)에 있다.
 
 ## 네이버 지도
 

@@ -23,9 +23,9 @@ let photoSeq = 0;
 
 export function RestaurantForm({ editId }: { editId?: string }) {
   const ready = useRequireLogin();
-  const { restaurants, me } = useAppState();
+  const { restaurants, me, loaded } = useAppState();
   // 다른 탭에서 지운 글은 수정 화면에 들어오지 못하게 서버 기준으로 맞춘다.
-  useEffect(() => { if (editId) void actions.loadRestaurant(editId).catch(() => undefined); }, [editId]);
+  useEffect(() => { if (loaded && editId) void actions.loadRestaurant(editId).catch(() => undefined); }, [editId, loaded]);
   if (!ready) return <PageLoading />;
   if (!editId) return <Form />;
   const target = restaurants.find((r) => r.id === editId);

@@ -20,6 +20,7 @@ export function DetailView({ id }: { id: string }) {
   const router = useRouter();
   const back = useBack();
   const state = useAppState();
+  const { loaded } = state;
   const { show, toast } = useFlashToast();
   const { busy, run } = useBusy();
   const [menuOpen, setMenuOpen] = useState(false);
@@ -27,7 +28,7 @@ export function DetailView({ id }: { id: string }) {
   const r = state.restaurants.find((x) => x.id === id);
 
   // 다른 기기·탭에서 지워졌거나 목록에 없는 글도 서버 기준으로 맞춘다. 네트워크 오류면 이미 가진 내용을 유지한다.
-  useEffect(() => { void actions.loadRestaurant(id).catch(() => undefined); }, [id]);
+  useEffect(() => { if (loaded) void actions.loadRestaurant(id).catch(() => undefined); }, [id, loaded]);
 
   if (!r) return <NotFound title="없는 글입니다" description="삭제되었거나 주소가 잘못된 글이에요" />;
 
