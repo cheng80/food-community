@@ -1,6 +1,6 @@
 # Day 64 핸드오프
 
-2026-11-10 기준. 작업 대상은 `food-community` 저장소의 `main`이다. 학습 작업공간에서는 `publish/food-community`에 있다. [공개 앱](https://food-community-nine.vercel.app)은 취소 동기화와 팝업 딤 수정이 포함된 `a1f9a00`을 [기존 Vercel 프로젝트에 배포](../deploy.md)한 버전이다. 문서 push는 자동 배포를 시작하지 않는다.
+2026-11-10 기준. 작업 대상은 `food-community` 저장소의 `main`이다. 학습 작업공간에서는 `publish/food-community`에 있다. Day 64 취소 동기화와 팝업 딤 수정 위에 Day 66 승인 웹훅을 추가해 [공개 앱](https://food-community-nine.vercel.app)에 [배포](../deploy.md)했다. 문서 push는 자동 배포를 시작하지 않는다.
 
 ## 어디서 이어갈지
 
@@ -23,4 +23,5 @@
 ## 남은 범위
 
 - 취소 동기화는 공개 배포에 연결했다. [웹훅 연결 및 재전송 검증](README.md#취소-웹훅-연결)을 참고한다.
+- 완료 화면 없이 승인 웹훅으로 결제를 기록하는 흐름은 [Day 66](../day66/README.md)에서 이어간다.
 - 운영 채널 전환, 수업 정원·중복 신청 처리, 실제 정산, LMS 제출은 이번 범위에 포함되지 않았다.

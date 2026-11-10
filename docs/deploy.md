@@ -1,8 +1,9 @@
 # Vercel 배포 준비
 
-Day 64 Production 배포(2026-11-10): https://food-community-nine.vercel.app
+Day 66 Production 배포(2026-11-10): https://food-community-nine.vercel.app
 
-- 팀 `virtues1`, 프로젝트 `food-community`, [배포 `dpl_6UfoNmUEG5nC847hrKhapGRuRGij`](https://vercel.com/virtues1/food-community/6UfoNmUEG5nC847hrKhapGRuRGij), 지역 `fra1`, Node 24.x, 소스 커밋 `a1f9a00`. Git 연결 없이 CLI로 올렸다.
+- 팀 `virtues1`, 프로젝트 `food-community`, [배포 `dpl_8tpWBBJLjmCQN5kgv5LtHYQsZFLo`](https://vercel.com/virtues1/food-community/8tpWBBJLjmCQN5kgv5LtHYQsZFLo), 함수 지역 `fra1`, Node 24.x, 소스 커밋 `0a35456`. Git 연결 없이 CLI로 올렸다.
+- 승인과 취소가 기존 포트원 테스트 웹훅 주소를 함께 사용한다. 이전 [Day 64 배포](https://vercel.com/virtues1/food-community/6UfoNmUEG5nC847hrKhapGRuRGij)는 취소 동기화와 팝업 딤 수정을 포함한다.
 - `APP_URL`은 위 주소다. 다른 alias `food-community-virtues1.vercel.app`은 `APP_URL`과 달라 쓰기 요청이 403이므로 안내하지 않는다.
 
 다시 배포할 때는 이 저장소 루트를 소스로 사용한다. 학습 작업공간에서의 경로는 `publish/food-community`다.
