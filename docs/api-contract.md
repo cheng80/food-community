@@ -1,6 +1,6 @@
 # BFF API 계약
 
-브라우저의 앱 데이터 요청은 `/api/*`와 `/auth/callback`을 거친다. 이미지 다운로드와 포트원 SDK 결제창은 각 서비스가 제공한다. 쓰기 요청은 같은 출처 `Origin`이 없으면 403이다. 오류 본문은 `{ "error": "한국어 메시지" }`이고 응답은 `Cache-Control: private, no-store`다.
+브라우저의 앱 데이터 요청은 `/api/*`와 `/auth/callback`을 거친다. 이미지 다운로드와 포트원 SDK 결제창은 각 서비스가 제공한다. 브라우저 쓰기 요청은 같은 출처 `Origin`이 없으면 403이다. 오류 본문은 `{ "error": "한국어 메시지" }`이고 응답은 `Cache-Control: private, no-store`다.
 
 공통 상태: `400` 입력 오류, `401` 비로그인, `403` 출처 또는 소유권 오류, `404` 없는 자원, `409` 상태 충돌, `413` 크기 초과, `415` JSON 아님, `502` Supabase 오류, `503` 환경변수 없음.
 
@@ -44,10 +44,12 @@
 | --- | --- | --- | --- |
 | GET | `/api/products` | | `{ products }` 공개 상품 최신순 |
 | GET | `/api/products/{id}` | | `{ product }` 공개 상품과 이미지 URL. 없으면 404 |
+| GET | `/api/payments` | 로그인 | `{ payments: [{ id, name, status, amount, occurredAt }] }` 본인 승인·취소 이벤트 최근 50건. 취소 금액은 음수, 시각 미제공 시 null |
 | POST | `/api/payments` | `{ productId }` | 201 PortOne SDK 요청. 가격은 서버가 결정 |
-| POST | `/api/payments/confirm` | `{ productId, paymentId }` | `{ name, amount }` 검증·저장 완료 또는 동일 승인 재조회 |
+| POST | `/api/payments/confirm` | `{ productId, paymentId }` | `{ name, amount, hasCancellation }` 승인 정보와 취소 이력 유무 |
+| POST | `/api/payments/webhook` | 포트원 V2 `2024-04-25` JSON 원문과 Standard Webhooks 서명 헤더 | `{ ok: true }` 저장 완료, 재전송 또는 처리 대상 외 이벤트 |
 
-결제 요청에는 인증과 같은 출처가 필요하다. 포트원 미승인·정보 불일치는 409, 포트원 접속 오류는 502, 키 누락이나 인증 거절은 503이다. 자세한 원칙은 [결제 규칙](../.claude/rules/payment.md)에 있다.
+브라우저 결제 쓰기 요청에는 인증과 같은 출처가 필요하다. 포트원 미승인·정보 불일치는 409, 포트원 접속 오류는 502, 키 누락이나 인증 거절은 503이다. 웹훅은 브라우저 인증 대신 원문 서명을 검증한다(잘못된 서명 401). `Transaction.Cancelled`·`Transaction.PartialCancelled`는 포트원 단건 조회에서 확인한 `SUCCEEDED` 취소만 반영한다. 확정 내역이 아직 조회되지 않거나 DB 저장에 실패하면 502로 응답해 재전송을 받을 수 있게 한다. 자세한 원칙은 [결제 규칙](../.claude/rules/payment.md)에 있다.
 
 ## 네이버 지도
 

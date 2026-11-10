@@ -14,3 +14,11 @@ export interface Product {
 }
 
 export const won = (amount: number) => `${amount.toLocaleString("ko-KR")}원`;
+
+export type PaymentHistoryItem = {
+  id: string;
+  name: string;
+  status: "PAID" | "CANCELLED";
+  amount: number;
+  occurredAt: string | null;
+};

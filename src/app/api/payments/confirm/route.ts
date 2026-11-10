@@ -26,6 +26,9 @@ export async function POST(request: Request) {
       });
       if (saveError) throw new ApiError(502, "결제 기록을 저장하지 못했어요. 이 화면에서 다시 확인해 주세요.");
     }
-    return { name: checkout.product_snapshot.name, amount: checkout.amount };
+    const cancellation = await db.from("payment").select("id")
+      .eq("transaction_key", paymentId).eq("status", "CANCELLED").limit(1).maybeSingle();
+    if (cancellation.error) throw new ApiError(502, "취소 내역을 조회하지 못했어요.");
+    return { name: checkout.product_snapshot.name, amount: checkout.amount, hasCancellation: !!cancellation.data };
   });
 }

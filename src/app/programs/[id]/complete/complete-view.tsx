@@ -9,7 +9,7 @@ import { RequestError, send } from "@/lib/api";
 import { won } from "@/lib/products";
 import { useHydrated } from "@/lib/store";
 
-type Receipt = { name: string; amount: number };
+type Receipt = { name: string; amount: number; hasCancellation: boolean };
 
 export function CompleteView({ productId, paymentId, cancelled }: {
   productId: string; paymentId?: string; cancelled: boolean;
@@ -41,10 +41,13 @@ export function CompleteView({ productId, paymentId, cancelled }: {
     <>
       <TopNavigation title="결제 확인" onBack={() => router.replace(productUrl)} />
       <main className="mx-auto flex w-full max-w-page flex-1 flex-col gap-(--spacing-16) p-(--spacing-20)">
-        <h1 className="heading-lg">{receipt ? "테스트 결제가 완료됐어요" : message ? "결제를 확인하지 못했어요" : "결제를 확인하고 있어요"}</h1>
-        {receipt && <p role="status" className="body-md">{receipt.name} · {won(receipt.amount)}</p>}
+        <h1 className="heading-lg">{receipt
+          ? receipt.hasCancellation ? "테스트 결제에 취소 내역이 있어요" : "테스트 결제가 완료됐어요"
+          : message ? "결제를 확인하지 못했어요" : "결제를 확인하고 있어요"}</h1>
+        {receipt && <p role="status" className="body-md">{receipt.name} · {receipt.hasCancellation && "승인 금액 "}{won(receipt.amount)}</p>}
         {message && <p role="alert" className="body-md text-text-secondary">{message}</p>}
         {error && <Button onClick={() => { setError(""); setRetry((n) => n + 1); }}>결제 결과 다시 확인</Button>}
+        {receipt && <Button onClick={() => router.push("/me#payments")}>결제 내역 보기</Button>}
         <Button variant="secondary" onClick={() => router.replace(receipt ? "/" : productUrl)}>{receipt ? "홈으로" : "상품 상세로"}</Button>
       </main>
     </>

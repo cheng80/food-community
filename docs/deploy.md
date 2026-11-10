@@ -29,6 +29,7 @@ Vercel Project Settings > Environment Variables의 Production에 넣는다. `.en
 | `PORTONE_STORE_ID` | 포트원 상점 ID | 서버, Sensitive |
 | `PORTONE_TEST_CHANNEL_KEY` | KG이니시스 V2 테스트 채널 키 | 서버, Sensitive |
 | `PORTONE_API_SECRET` | 포트원 V2 API Secret | 서버, Sensitive |
+| `PORTONE_WEBHOOK_SECRET` | 포트원 V2 테스트 웹훅 서명 키 | 서버, Sensitive |
 | `SUPABASE_PAYMENT_SERVER_KEY` | 결제 준비·승인 기록용 Supabase 서버 키 | 서버, Sensitive |
 
 일반 앱 요청용 `SUPABASE_PUBLISHABLE_KEY`에는 권한이 높은 키를 넣지 않는다. 결제 기록용 키는 `SUPABASE_PAYMENT_SERVER_KEY`로만 서버에서 읽는다. `NEXT_PUBLIC_` 값을 바꾸면 다시 빌드해야 한다.

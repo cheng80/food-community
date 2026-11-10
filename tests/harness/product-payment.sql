@@ -113,4 +113,56 @@ begin
 end;
 $$;
 
+insert into public.payment_checkout (id, product_id, user_id, amount, product_snapshot) values
+  ('40000000-0000-4000-8000-000000000002', '20000000-0000-0000-0000-000000000001',
+    '10000000-0000-0000-0000-000000000002', 35000, '{"name":"취소가 먼저 온 주문","price":35000}');
+
+do $$
+declare
+  first_order uuid := '40000000-0000-4000-8000-000000000001';
+  second_order uuid := '40000000-0000-4000-8000-000000000002';
+  first_cancel jsonb := '[{"id":"partial","amount":10000,"cancelled_at":"2026-11-09T03:00:00Z"}]';
+  rest_cancel jsonb := '[{"id":"rest","amount":25000}]';
+begin
+  perform public.record_portone_cancellations(first_order, null, first_cancel);
+  begin
+    perform public.record_portone_cancellations(first_order, null, '[{"id":"rollback","amount":25000},{"id":"over","amount":1}]');
+    raise exception '승인액 초과 취소 허용';
+  exception when check_violation then null;
+  end;
+  assert (select sum(amount) from public.payment where transaction_key = first_order::text) = 25000, '실패한 배치 일부 저장';
+  perform public.record_portone_cancellations(first_order, null, rest_cancel || first_cancel);
+  perform public.record_portone_cancellations(first_order, null, first_cancel);
+  assert (select sum(amount) from public.payment where transaction_key = first_order::text) = 0, '전액 취소 후 잔액';
+  assert (select count(*) from public.payment where transaction_key = first_order::text) = 3, '중복 취소 또는 원승인 변경';
+  assert (select s.product_snapshot ->> 'price' from public.payment p join public.payment_snapshot s
+    on s.id = p.payment_snapshot_id where p.provider_event_key = 'portone:cancel:' || first_order::text || ':partial') = '35000',
+    '취소 스냅샷은 원승인 당시 가격을 보존해야 함';
+  assert (select count(*) from public.payment_snapshot) = 8, '중복 또는 고아 취소 스냅샷';
+
+  begin
+    perform public.record_portone_cancellations(second_order, now(), '[{"id":"over","amount":35001}]');
+    raise exception '승인 전 초과 취소 허용';
+  exception when check_violation then null;
+  end;
+  assert not exists (select 1 from public.payment where transaction_key = second_order::text), '취소 저장 실패 후 원승인만 남음';
+  perform public.record_portone_cancellations(second_order, '2026-11-09T02:00:00Z', '[{"id":"all","amount":35000}]');
+  perform public.record_portone_payment(second_order, '10000000-0000-0000-0000-000000000002', now());
+  assert (select count(*) from public.payment where transaction_key = second_order::text) = 2, '취소 선도착 후 중복 승인';
+  assert (select sum(amount) from public.payment where transaction_key = second_order::text) = 0, '취소 선도착 후 잔액';
+  assert not has_function_privilege('authenticated', 'public.record_portone_cancellations(uuid,timestamptz,jsonb)', 'execute'),
+    '일반 회원이 취소 기록 가능';
+  assert not has_function_privilege('anon', 'public.record_portone_cancellations(uuid,timestamptz,jsonb)', 'execute'),
+    '비회원이 취소 기록 가능';
+end;
+$$;
+
+set local role authenticated;
+do $$
+begin
+  assert (select count(*) from public.payment where status = 'CANCELLED' and transaction_key like '40000000-%') = 2,
+    '본인 취소 누락 또는 타인 취소 노출';
+end;
+$$;
+
 rollback;

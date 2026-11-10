@@ -16,6 +16,7 @@ import { nicknameError, shortAddress, timeAgo } from "@/lib/format";
 import { actions, useAppState, useNow } from "@/lib/store";
 import { commitDrafts, discardImage, uploadImage } from "@/lib/upload";
 import { IMAGE_TYPES } from "@/lib/validation";
+import { PaymentHistory } from "./payment-history";
 
 export function MeView() {
   const ready = useRequireLogin();
@@ -154,6 +155,7 @@ export function MeView() {
             </div>
           )}
         </section>
+        <PaymentHistory key={me.id} />
       </main>
 
       <Modal
