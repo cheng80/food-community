@@ -78,13 +78,28 @@ function checkOrder(id: string, paid: PortonePayment, checkout: Checkout, config
 
 const isDate = (value: unknown): value is string => typeof value === "string" && Number.isFinite(Date.parse(value));
 
-export async function verifyPortone(id: string, checkout: Checkout, config: Config) {
+export async function verifyPortone(id: string, checkout: Checkout, config: Config, transactionId?: string) {
   const paid = await getPortonePayment(id, config);
   if (paid.status !== "PAID" || !isDate(paid.paidAt)) {
     throw new ApiError(409, "완료된 결제가 아직 확인되지 않았어요.");
   }
   checkOrder(id, paid, checkout, config);
+  if (transactionId !== undefined && paid.transactionId !== transactionId) {
+    throw new ApiError(409, "포트원 거래 번호가 일치하지 않아요.");
+  }
   return paid.paidAt;
+}
+
+export async function recordPortoneApproval(
+  db: ReturnType<typeof paymentDb>, id: string, checkout: Checkout, config: Config, transactionId?: string,
+) {
+  const paidAt = await verifyPortone(id, checkout, config, transactionId);
+  const saved = await db.rpc("record_portone_payment", {
+    p_checkout_id: id, p_user_id: checkout.user_id, p_paid_at: paidAt,
+  });
+  if (saved.error || saved.status < 200 || saved.status >= 300 || !saved.data) {
+    throw new ApiError(502, "결제 기록을 저장하지 못했어요. 다시 확인해 주세요.");
+  }
 }
 
 export async function verifyPortoneCancellation(

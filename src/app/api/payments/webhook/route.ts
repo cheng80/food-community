@@ -1,6 +1,6 @@
 import { InvalidInputError, verify, WebhookVerificationError } from "@portone/server-sdk/webhook";
 import { api, ApiError } from "@/lib/server/http";
-import { paymentDb, portoneConfig, verifyPortoneCancellation } from "@/lib/server/portone";
+import { paymentDb, portoneConfig, recordPortoneApproval, verifyPortoneCancellation } from "@/lib/server/portone";
 import { isUuid } from "@/lib/validation";
 
 export async function POST(request: Request) {
@@ -19,9 +19,11 @@ export async function POST(request: Request) {
       throw error;
     }
     if (typeof webhook?.type !== "string") throw new ApiError(400, "웹훅 이벤트가 올바르지 않아요.");
-    if (webhook.type !== "Transaction.Cancelled" && webhook.type !== "Transaction.PartialCancelled") return { ok: true };
+    if (webhook.type !== "Transaction.Paid" && webhook.type !== "Transaction.Cancelled"
+      && webhook.type !== "Transaction.PartialCancelled") return { ok: true };
 
-    const { paymentId, storeId, transactionId, cancellationId } = webhook.data ?? {};
+    const { paymentId, storeId, transactionId } = webhook.data ?? {};
+    const cancellationId = webhook.type === "Transaction.Paid" ? undefined : webhook.data?.cancellationId;
     if (typeof storeId !== "string" || typeof paymentId !== "string" || typeof transactionId !== "string" || !transactionId
       || (cancellationId !== undefined && (typeof cancellationId !== "string" || !cancellationId.trim()))) {
       throw new ApiError(400, "웹훅 거래 정보가 올바르지 않아요.");
@@ -34,6 +36,17 @@ export async function POST(request: Request) {
       .select("product_id,user_id,amount,product_snapshot").eq("id", paymentId).maybeSingle();
     if (error || status < 200 || status >= 300) throw new ApiError(502, "주문 정보를 조회하지 못했어요.");
     if (!checkout) return { ok: true };
+
+    if (webhook.type === "Transaction.Paid") {
+      // 승인 재전송이 확정 취소보다 늦어도 이미 저장한 원승인을 인정한다.
+      const existing = await db.from("payment").select("id")
+        .eq("transaction_key", paymentId).eq("status", "PAID").eq("user_id", checkout.user_id).maybeSingle();
+      if (existing.error || existing.status < 200 || existing.status >= 300) {
+        throw new ApiError(502, "결제 이력을 조회하지 못했어요.");
+      }
+      if (!existing.data) await recordPortoneApproval(db, paymentId, checkout, config, transactionId);
+      return { ok: true };
+    }
 
     const { paidAt, cancellations } = await verifyPortoneCancellation(paymentId, transactionId, cancellationId, checkout, config);
     const saved = await db.rpc("record_portone_cancellations", {

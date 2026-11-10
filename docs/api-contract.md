@@ -49,7 +49,7 @@
 | POST | `/api/payments/confirm` | `{ productId, paymentId }` | `{ name, amount, hasCancellation }` 승인 정보와 취소 이력 유무 |
 | POST | `/api/payments/webhook` | 포트원 V2 `2024-04-25` JSON 원문과 Standard Webhooks 서명 헤더 | `{ ok: true }` 저장 완료, 재전송 또는 처리 대상 외 이벤트 |
 
-브라우저 결제 쓰기 요청에는 인증과 같은 출처가 필요하다. 포트원 미승인·정보 불일치는 409, 포트원 접속 오류는 502, 키 누락이나 인증 거절은 503이다. 웹훅은 브라우저 인증 대신 원문 서명을 검증한다(잘못된 서명 401). `Transaction.Cancelled`·`Transaction.PartialCancelled`는 포트원 단건 조회에서 확인한 `SUCCEEDED` 취소만 반영한다. 확정 내역이 아직 조회되지 않거나 DB 저장에 실패하면 502로 응답해 재전송을 받을 수 있게 한다. 자세한 원칙은 [결제 규칙](../.claude/rules/payment.md)에 있다.
+브라우저 결제 쓰기 요청에는 인증과 같은 출처가 필요하다. 포트원 미승인·정보 불일치는 409, 포트원 접속 오류는 502, 키 누락이나 인증 거절은 503이다. 웹훅은 브라우저 인증 대신 원문 서명을 검증한다(잘못된 서명 401). `Transaction.Paid`는 포트원 단건 조회로 승인과 거래 정보를 확인하고, 완료 화면에 돌아오지 않아도 승인과 스냅샷을 저장한다. `Transaction.Cancelled`·`Transaction.PartialCancelled`는 조회에서 확인한 `SUCCEEDED` 취소만 반영한다. DB 저장 실패는 502로 응답해 재전송을 받을 수 있게 한다. 자세한 원칙은 [결제 규칙](../.claude/rules/payment.md)에 있다.
 
 ## 네이버 지도
 

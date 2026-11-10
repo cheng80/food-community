@@ -1,5 +1,5 @@
 import { api, ApiError, checkOrigin, json } from "@/lib/server/http";
-import { paymentDb, portoneConfig, verifyPortone } from "@/lib/server/portone";
+import { paymentDb, portoneConfig, recordPortoneApproval } from "@/lib/server/portone";
 import { requireUser } from "@/lib/server/supabase";
 import { isUuid } from "@/lib/validation";
 
@@ -19,13 +19,7 @@ export async function POST(request: Request) {
 
     const existing = await db.from("payment").select("id").eq("transaction_key", paymentId).eq("status", "PAID").maybeSingle();
     if (existing.error) throw new ApiError(502, "결제 이력을 조회하지 못했어요.");
-    if (!existing.data) {
-      const paidAt = await verifyPortone(paymentId, checkout, config);
-      const { error: saveError } = await server.rpc("record_portone_payment", {
-        p_checkout_id: paymentId, p_user_id: user.id, p_paid_at: paidAt,
-      });
-      if (saveError) throw new ApiError(502, "결제 기록을 저장하지 못했어요. 이 화면에서 다시 확인해 주세요.");
-    }
+    if (!existing.data) await recordPortoneApproval(server, paymentId, checkout, config);
     const cancellation = await db.from("payment").select("id")
       .eq("transaction_key", paymentId).eq("status", "CANCELLED").limit(1).maybeSingle();
     if (cancellation.error) throw new ApiError(502, "취소 내역을 조회하지 못했어요.");

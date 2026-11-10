@@ -8,6 +8,7 @@ import http from "node:http";
 import { createRequire } from "node:module";
 import { tmpdir } from "node:os";
 import path from "node:path";
+import { pathToFileURL } from "node:url";
 
 const tools = process.env.VERIFY_TOOLS;
 if (!tools) throw new Error("VERIFY_TOOLS 경로가 필요해요 (docs/verify.md)");
@@ -17,6 +18,12 @@ const native = path.join(tools, "node_modules/@embedded-postgres", readdirSync(p
 export const ports = { pg: 54398, rest: 54397, gateway: 54399, next: 3101, app: 3100, naver: 4610 };
 export const JWT_SECRET = "local-verify-secret-local-verify-secret-0123";
 export const PUBLISHABLE_KEY = "sb_publishable_local_verify";
+export const PORTONE_ENV = {
+  PORTONE_STORE_ID: "store-local-test",
+  PORTONE_TEST_CHANNEL_KEY: "channel-local-test",
+  PORTONE_API_SECRET: "portone-local-test-secret",
+  PORTONE_WEBHOOK_SECRET: "whsec_" + Buffer.from("local-verify-webhook-secret-0123").toString("base64"),
+};
 const INGRESS_LIMIT = 4.5 * 1024 * 1024;
 const root = process.cwd();
 const children = [];
@@ -90,6 +97,7 @@ function startRest() {
 
 function gateway(pool) {
   const anonJwt = sign({ role: "anon", exp: Math.floor(Date.now() / 1000) + 86400 });
+  const portonePayments = new Map();
   const codes = new Map(); // code → { challenge, user, ttl }
   const refreshTokens = new Map(); // token → { user, session }
   const revoked = new Set();
@@ -255,11 +263,22 @@ function gateway(pool) {
         if (url.pathname === "/__test/log") return reply(res, 200, log);
         if (url.pathname === "/__test/objects") return reply(res, 200, (await pool.query("select bucket_id, name, size, mimetype from storage.objects order by created_at")).rows);
         if (url.pathname === "/__test/query") return reply(res, 200, (await pool.query(input.sql, input.params)).rows);
+        if (url.pathname === "/__test/portone") {
+          portonePayments.set(input.id, input);
+          return reply(res, 200, { ok: true });
+        }
         if (url.pathname === "/__test/token") {
           const user = await findUser(input.email, input.fullName);
           return reply(res, 200, { id: user.id, token: issue(user).access_token });
         }
         return reply(res, 404, {});
+      }
+      const portonePath = url.pathname.match(/^\/__portone\/payments\/([^/]+)(\/pre-register)?$/);
+      if (portonePath) {
+        if (req.headers.authorization !== `PortOne ${PORTONE_ENV.PORTONE_API_SECRET}`) return reply(res, 401, {});
+        if (req.method === "POST" && portonePath[2]) return reply(res, 200, {});
+        const payment = portonePayments.get(portonePath[1]);
+        return reply(res, payment ? 200 : 404, payment ?? { type: "PAYMENT_NOT_FOUND" });
       }
       log.push({ method: req.method, path: url.pathname, size: body.length });
       const failure = failures.find((f) => (!f.method || f.method === req.method) && f.re.test(url.pathname) && f.times > 0);
@@ -317,9 +336,12 @@ export async function startStack() {
     stdio: "ignore",
     env: {
       ...process.env,
+      ...PORTONE_ENV,
       NODE_ENV: "production",
+      NODE_OPTIONS: `${process.env.NODE_OPTIONS ?? ""} --import=${pathToFileURL(path.join(root, "tests/harness/portone-fetch.mjs")).href}`.trim(),
       SUPABASE_URL: `http://127.0.0.1:${ports.gateway}`,
       SUPABASE_PUBLISHABLE_KEY: PUBLISHABLE_KEY,
+      SUPABASE_PAYMENT_SERVER_KEY: sign({ role: "service_role", exp: Math.floor(Date.now() / 1000) + 3600 }),
       SUPABASE_STORAGE_URL: `http://127.0.0.1:${ports.gateway}/storage/v1/object/public`,
       APP_URL: `http://localhost:${ports.app}`,
       NAVER_SEARCH_URL: `http://127.0.0.1:${ports.naver}/search/v1/local`,
