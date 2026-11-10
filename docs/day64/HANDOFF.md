@@ -1,6 +1,12 @@
-# Day 64 핸드오프
+# 결제 핸드오프 · Day 64–66
 
 2026-11-10 기준. 작업 대상은 `food-community` 저장소의 `main`이다. 학습 작업공간에서는 `publish/food-community`에 있다. Day 64 취소 동기화와 팝업 딤 수정 위에 Day 66 승인 웹훅을 추가해 [공개 앱](https://food-community-nine.vercel.app)에 [배포](../deploy.md)했다. 문서 push는 자동 배포를 시작하지 않는다.
+
+## Day 66 실검증 결과
+
+- Ego CLI에서 완료 화면 복귀를 막고 네이버페이 카드로 35,000원 테스트 결제를 승인했다. Vercel 로그에서 `/complete`와 `POST /api/payments/confirm`은 각각 0건이었다.
+- 실제 포트원 `Transaction.Paid`가 HTTP 200을 받았고, Supabase 결제와 스냅샷은 각각 0건에서 1건이 됐다. 같은 승인 웹훅을 수동 재전송해도 건수와 두 레코드 ID는 그대로였다.
+- 승인 거래를 전액 취소했다. 기존 취소 웹훅도 성공했고 마이페이지에 승인 35,000원과 취소 −35,000원이 각각 한 번 표시됐다. [상세 결과와 재현 절차](../day66/README.md#완료-화면-차단-실검증-2026-11-10)를 참고한다.
 
 ## 어디서 이어갈지
 
@@ -9,6 +15,7 @@
 | 상품 데이터와 이미지 | [마이그레이션](../../supabase/migrations/), [상품 등록 SQL](register-product.sql), [Day 64 자료와 검증](README.md) |
 | 상품 목록·상세와 결제 화면 | [상품 API](../../src/app/api/products/), [프로그램 화면](../../src/app/programs/) |
 | 테스트 주문·승인 확인 | [결제 API](../../src/app/api/payments/), [포트원 검증](../../src/lib/server/portone.ts), [결제 규칙](../../.claude/rules/payment.md) |
+| 완료 화면 없이 승인·취소 검증 | [Day 66 재현 절차](../day66/README.md#완료-화면-없이-재현하는-절차) |
 | 환경변수와 배포 | [로컬 설정 예시](../../.env.example), [Vercel 절차](../deploy.md) |
 
 기존 Supabase에 Day 64 마이그레이션 3개와 공개 샘플 상품이 적용돼 있다. 재검증에 상품 재등록은 필요 없다. V2 API Secret에 만료가 설정돼 있으므로 재검증 전 콘솔에서 만료일을 확인한다. 교체가 필요하면 로컬과 Vercel Production의 `PORTONE_API_SECRET`을 함께 갱신하고 재배포한다. 키 값은 저장소나 로그에 남기지 않는다.
@@ -22,6 +29,4 @@
 
 ## 남은 범위
 
-- 취소 동기화는 공개 배포에 연결했다. [웹훅 연결 및 재전송 검증](README.md#취소-웹훅-연결)을 참고한다.
-- 완료 화면 없이 승인 웹훅으로 결제를 기록하는 흐름은 [Day 66](../day66/README.md)에서 이어간다.
 - 운영 채널 전환, 수업 정원·중복 신청 처리, 실제 정산, LMS 제출은 이번 범위에 포함되지 않았다.
