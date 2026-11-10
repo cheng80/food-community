@@ -1,8 +1,8 @@
 # Vercel 배포 준비
 
-Day 64 Production 배포(2026-11-09): https://food-community-nine.vercel.app
+Day 64 Production 배포(2026-11-10): https://food-community-nine.vercel.app
 
-- 팀 `virtues1`, 프로젝트 `food-community`, [배포 `dpl_DMc2HbjN9CzvMWCipLnieVZ88sQw`](https://vercel.com/virtues1/food-community/DMc2HbjN9CzvMWCipLnieVZ88sQw), 지역 `fra1`, Node 24.x, 소스 커밋 [`e42c144`](https://github.com/cheng80/food-community/commit/e42c144b78aee431384cfede8aff04a67e11b43f). Git 연결 없이 CLI로 올렸다.
+- 팀 `virtues1`, 프로젝트 `food-community`, [배포 `dpl_6UfoNmUEG5nC847hrKhapGRuRGij`](https://vercel.com/virtues1/food-community/6UfoNmUEG5nC847hrKhapGRuRGij), 지역 `fra1`, Node 24.x, 소스 커밋 `a1f9a00`. Git 연결 없이 CLI로 올렸다.
 - `APP_URL`은 위 주소다. 다른 alias `food-community-virtues1.vercel.app`은 `APP_URL`과 달라 쓰기 요청이 403이므로 안내하지 않는다.
 
 다시 배포할 때는 이 저장소 루트를 소스로 사용한다. 학습 작업공간에서의 경로는 `publish/food-community`다.
@@ -38,7 +38,7 @@ Vercel Project Settings > Environment Variables의 Production에 넣는다. `.en
 
 ## 수동 배포
 
-1. 배포할 GitHub `main` 커밋을 확인하고 `git archive`로 별도 디렉터리에 풀어 로컬 설정 파일과 작업 중인 변경을 배포 대상에서 뺀다.
+1. 배포할 `main` 커밋을 확인하고 `git archive`로 별도 디렉터리에 풀어 로컬 설정 파일과 작업 중인 변경을 배포 대상에서 뺀다.
 2. 그 디렉터리를 `vercel link --yes --team virtues1 --project food-community`로 기존 프로젝트에 연결한다. Production 환경변수와 `APP_URL`을 확인한다.
 3. `vercel deploy --prod --skip-domain --scope virtues1`로 빌드한다. `vercel inspect <배포 URL> --scope virtues1`에서 `READY`와 빌드 결과를 확인한다.
 4. `vercel promote <배포 URL> --scope virtues1`로 기존 공개 주소를 전환한다. 공개 주소를 다시 조회해 새 배포 ID와 아래 동작을 확인한다.
