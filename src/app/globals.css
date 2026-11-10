@@ -221,3 +221,7 @@ body {
   color: var(--color-text-default);
   font-family: var(--font-sans);
 }
+
+html:has([role="dialog"][aria-modal="true"]) {
+  overflow: hidden;
+}
